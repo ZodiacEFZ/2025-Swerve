@@ -1,0 +1,3 @@
+[submodule "libzodiac"]
+	path = src/main/java/frc/libzodiac
+	url = https://github.com/ZodiacEFZ/libzodiac.git
