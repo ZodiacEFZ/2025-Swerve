@@ -4,15 +4,16 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.subsystem.Zwerve;
+import frc.libzodiac.util.Rotation2dSupplier;
+import frc.libzodiac.util.Translation2dSupplier;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -21,11 +22,10 @@ import frc.libzodiac.subsystem.Zwerve;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-    // The robot's subsystems
-    private final Zwerve chassis;
-
     // The driver's controller
-    CommandXboxController driver = new CommandXboxController(0);
+    final CommandXboxController driver = new CommandXboxController(0);
+    // The robot's subsystems
+    private final Zwerve swerve;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -41,20 +41,16 @@ public class RobotContainer {
         swerveConfig.frontRight = new TalonFXSwerveModule(4, 8, 12, 1856, false, true);
         swerveConfig.rearRight = new TalonFXSwerveModule(3, 7, 11, 3349, false, true);
         swerveConfig.gyroId = 0;
-        this.chassis = new Zwerve(swerveConfig);
+        swerveConfig.headingController = new PIDController(0.4, 0.01, 0.01);
+        swerveConfig.headingController.setIZone(Math.PI / 4);
+        this.swerve = new Zwerve(swerveConfig);
 
         // Configure the button bindings
         this.configureButtonBindings();
 
+        this.swerve.setFieldCentric(true);
         // Configure default commands
-        this.chassis.setDefaultCommand(
-                // The left stick controls translation of the robot.
-                // Turning is controlled by the X axis of the right stick.
-                new RunCommand(() -> chassis.drive(
-                        // Multiply by max speed to map the joystick unitless inputs to actual units.
-                        // This will map the [-1, 1] to [max speed backwards, max speed forwards],
-                        // converting them to actual units.
-                        new Translation2d(driver.getLeftY(), driver.getLeftX()), driver.getRightX(), false), chassis));
+        this.setDriveCommand(true);
     }
 
     /**
@@ -64,7 +60,40 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        driver.a().onTrue(new InstantCommand(chassis::resetEncoders));
+        driver.a().onTrue(Commands.runOnce(swerve::toggleFieldCentric));
+        driver.b().onTrue(Commands.none());
+        driver.x().onTrue(Commands.none());
+        driver.y().onTrue(Commands.runOnce(swerve::zeroHeading));
+        driver.leftBumper().onTrue(Commands.none());
+        driver.rightBumper().onTrue(Commands.runOnce(() -> setDriveCommand(false)).repeatedly())
+                .onFalse(Commands.runOnce(() -> setDriveCommand(true)).repeatedly());
+        driver.start().onTrue(Commands.runOnce(swerve::resetEncoders));
+        driver.back().whileTrue(Commands.runOnce(swerve::centerModules));
+    }
+
+    public void setDriveCommand(boolean driveDirectAngle) {
+        var translation = new Translation2dSupplier(() -> -driver.getLeftY(),
+                () -> -driver.getLeftX());
+        /*
+          Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
+         */
+        var angularVelocityInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
+                .deadband(0.05);
+
+        var heading = new Rotation2dSupplier(driver::getRightX, driver::getRightY);
+
+        /*
+          Clone's the angular velocity input stream and converts it to a direct angle input stream.
+         */
+        var directAngleInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
+                .deadband(0.05).withHeading(heading);
+
+        /*
+          Direct angle input can only be used in field centric mode.
+         */
+        this.swerve.setDefaultCommand(this.swerve.driveCommand(
+                (driveDirectAngle && this.swerve.getFieldCentric()) ? directAngleInput : angularVelocityInput,
+                this.swerve.getFieldCentric()));
     }
 
     /**
@@ -120,5 +149,9 @@ public class RobotContainer {
         //        // command, then stop at the end.
         //        return Commands.sequence(new InstantCommand(() -> chassis.resetOdometry(exampleTrajectory.getInitialPose())),
         //                swerveControllerCommand, new InstantCommand(() -> chassis.drive(0, 0, 0, false)));
+    }
+
+    public void setMotorBrake(boolean brake) {
+        swerve.setMotorBrake(brake);
     }
 }

@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
     private final RobotContainer bot;
+    private final Timer disabledTimer;
     private Command autonomousCommand;
 
     /**
@@ -25,6 +27,7 @@ public class Robot extends TimedRobot {
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         bot = new RobotContainer();
+        disabledTimer = new Timer();
     }
 
     /**
@@ -32,6 +35,9 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
+        bot.setMotorBrake(true);
+        disabledTimer.reset();
+        disabledTimer.start();
     }
 
     /**
@@ -39,6 +45,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
+        bot.setMotorBrake(true);
+
         autonomousCommand = bot.getAutonomousCommand();
 
         /*
@@ -89,6 +97,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
+        if (disabledTimer.hasElapsed(1)) {
+            bot.setMotorBrake(false);
+            disabledTimer.stop();
+        }
     }
 
     /**
