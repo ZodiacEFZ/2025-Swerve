@@ -31,18 +31,29 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        Zwerve.SwerveConfig swerveConfig = new Zwerve.SwerveConfig();
+        Zwerve.Config swerveConfig = new Zwerve.Config();
         swerveConfig.ROBOT_WIDTH = 0.7;
         swerveConfig.ROBOT_LENGTH = 0.7;
         swerveConfig.MAX_SPEED = 3;
         swerveConfig.MAX_ANGULAR_SPEED = 2 * Math.PI;
-        swerveConfig.frontLeft = new TalonFXSwerveModule(1, 5, 9, 2215, false, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule(2, 6, 10, -1373, false, true);
-        swerveConfig.frontRight = new TalonFXSwerveModule(4, 8, 12, 1856, false, true);
-        swerveConfig.rearRight = new TalonFXSwerveModule(3, 7, 11, 3349, false, true);
+
+        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, false, true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -1373, false, true);
+        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1856, false, true);
+        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3349, false, true);
+
         swerveConfig.gyroId = 0;
+
         swerveConfig.headingController = new PIDController(0.4, 0.01, 0.01);
         swerveConfig.headingController.setIZone(Math.PI / 4);
+
+        swerveConfig.ANGLE_GEAR_RATIO = 150.0 / 7.0;
+        swerveConfig.DRIVE_GEAR_RATIO = 6.75;
+        swerveConfig.WHEEL_RADIUS = 5;
+
+        swerveConfig.drivePid = new PIDController(0.15, 0, 2);
+        swerveConfig.anglePid = new PIDController(10, 0.5, 0.5);
+
         this.swerve = new Zwerve(swerveConfig);
 
         // Configure the button bindings
@@ -50,7 +61,7 @@ public class RobotContainer {
 
         this.swerve.setFieldCentric(true);
         // Configure default commands
-        this.setDriveCommand(true);
+        this.setDirectAngle(true);
     }
 
     /**
@@ -60,40 +71,48 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        driver.a().onTrue(Commands.runOnce(swerve::toggleFieldCentric));
+        driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
         driver.b().onTrue(Commands.none());
         driver.x().onTrue(Commands.none());
         driver.y().onTrue(Commands.runOnce(swerve::zeroHeading));
         driver.leftBumper().onTrue(Commands.none());
-        driver.rightBumper().onTrue(Commands.runOnce(() -> setDriveCommand(false)).repeatedly())
-                .onFalse(Commands.runOnce(() -> setDriveCommand(true)).repeatedly());
+        driver.rightBumper().onTrue(Commands.runOnce(() -> this.setDirectAngle(false)))
+                .onFalse(Commands.runOnce(() -> this.setDirectAngle(true)));
         driver.start().onTrue(Commands.runOnce(swerve::resetEncoders));
         driver.back().whileTrue(Commands.runOnce(swerve::centerModules));
     }
 
-    public void setDriveCommand(boolean driveDirectAngle) {
-        var translation = new Translation2dSupplier(() -> -driver.getLeftY(),
-                () -> -driver.getLeftX());
+    private void setDriveCommand() {
+        var translation = new Translation2dSupplier(() -> -driver.getLeftY(), () -> -driver.getLeftX());
+
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
         var angularVelocityInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
                 .deadband(0.05);
 
-        var heading = new Rotation2dSupplier(driver::getRightX, driver::getRightY);
-
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
         var directAngleInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
-                .deadband(0.05).withHeading(heading);
+                .deadband(0.05).withHeading(new Rotation2dSupplier(driver::getRightX, driver::getRightY));
 
         /*
           Direct angle input can only be used in field centric mode.
          */
-        this.swerve.setDefaultCommand(this.swerve.driveCommand(
-                (driveDirectAngle && this.swerve.getFieldCentric()) ? directAngleInput : angularVelocityInput,
-                this.swerve.getFieldCentric()));
+        this.swerve.setDefaultCommand(
+                this.swerve.driveCommand(directAngleInput, angularVelocityInput, this.swerve.getDirectAngle(),
+                        this.swerve.getFieldCentric()));
+    }
+
+    public void toggleFieldCentric() {
+        this.swerve.toggleFieldCentric();
+        this.setDriveCommand();
+    }
+
+    public void setDirectAngle(boolean directAngle) {
+        this.swerve.setDirectAngle(directAngle);
+        this.setDriveCommand();
     }
 
     /**
