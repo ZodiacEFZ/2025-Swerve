@@ -6,8 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.libzodiac.hardware.TalonFXMotor;
+import frc.libzodiac.ui.elastic.elasticlib.Elastic;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -26,7 +29,7 @@ public class Robot extends TimedRobot {
     public Robot() {
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
-        bot = new RobotContainer();
+        this.bot = new RobotContainer();
         disabledTimer = new Timer();
     }
 
@@ -35,7 +38,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        bot.setMotorBrake(true);
+        this.bot.setMotorBrake(true);
         disabledTimer.reset();
         disabledTimer.start();
     }
@@ -45,9 +48,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        bot.setMotorBrake(true);
+        Elastic.selectTab("Autonomous");
+        this.bot.setMotorBrake(true);
 
-        autonomousCommand = bot.getAutonomousCommand();
+        autonomousCommand = this.bot.getAutonomousCommand();
 
         /*
          * String autoSelected = SmartDashboard.getString("Auto Selector",
@@ -71,6 +75,8 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
+
+        Elastic.selectTab("Teleoperated");
     }
 
     @Override
@@ -93,12 +99,14 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+        
+        this.bot.updateDashboard();
     }
 
     @Override
     public void disabledPeriodic() {
         if (disabledTimer.hasElapsed(1)) {
-            bot.setMotorBrake(false);
+            this.bot.setMotorBrake(false);
             disabledTimer.stop();
         }
     }

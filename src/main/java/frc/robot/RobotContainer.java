@@ -5,13 +5,16 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.libzodiac.drivetrain.Zwerve;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
-import frc.libzodiac.subsystem.Zwerve;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
 
@@ -23,9 +26,10 @@ import frc.libzodiac.util.Translation2dSupplier;
  */
 public class RobotContainer {
     // The driver's controller
-    final CommandXboxController driver = new CommandXboxController(0);
+    private final CommandXboxController driver = new CommandXboxController(0);
     // The robot's subsystems
-    private final Zwerve swerve;
+    private final Zwerve drivetrain;
+    private final PowerDistribution powerDistribution = new PowerDistribution();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -37,10 +41,10 @@ public class RobotContainer {
         swerveConfig.MAX_SPEED = 3;
         swerveConfig.MAX_ANGULAR_SPEED = 2 * Math.PI;
 
-        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, false, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -1373, false, true);
-        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1856, false, true);
-        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3349, false, true);
+        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, true, true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 1917, true, true);
+        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914, true, true);
+        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328, true, true);
 
         swerveConfig.gyroId = 0;
 
@@ -49,19 +53,20 @@ public class RobotContainer {
 
         swerveConfig.ANGLE_GEAR_RATIO = 150.0 / 7.0;
         swerveConfig.DRIVE_GEAR_RATIO = 6.75;
-        swerveConfig.WHEEL_RADIUS = 5;
+        swerveConfig.WHEEL_RADIUS = 0.05;
 
-        swerveConfig.drivePid = new PIDController(0.15, 0, 2);
-        swerveConfig.anglePid = new PIDController(10, 0.5, 0.5);
+        swerveConfig.drivePid = new PIDController(0.2, 7.5, 0.0005);
+        swerveConfig.anglePid = new PIDController(0.5, 1, 0.0005);
 
-        this.swerve = new Zwerve(swerveConfig);
+        this.drivetrain = new Zwerve(swerveConfig);
 
         // Configure the button bindings
         this.configureButtonBindings();
 
-        this.swerve.setFieldCentric(true);
+        this.drivetrain.setFieldCentric(true);
         // Configure default commands
         this.setDirectAngle(true);
+        this.setDriveCommand();
     }
 
     /**
@@ -74,12 +79,16 @@ public class RobotContainer {
         driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
         driver.b().onTrue(Commands.none());
         driver.x().onTrue(Commands.none());
-        driver.y().onTrue(Commands.runOnce(swerve::zeroHeading));
+        driver.y().onTrue(Commands.runOnce(drivetrain::zeroHeading));
         driver.leftBumper().onTrue(Commands.none());
-        driver.rightBumper().onTrue(Commands.runOnce(() -> this.setDirectAngle(false)))
-                .onFalse(Commands.runOnce(() -> this.setDirectAngle(true)));
-        driver.start().onTrue(Commands.runOnce(swerve::resetEncoders));
-        driver.back().whileTrue(Commands.runOnce(swerve::centerModules));
+        driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
+        driver.start().onTrue(Commands.none());
+        driver.back().whileTrue(Commands.runOnce(drivetrain::centerModules).repeatedly());
+    }
+
+    public void setDirectAngle(boolean directAngle) {
+        this.drivetrain.setDirectAngle(directAngle);
+        this.setDriveCommand();
     }
 
     private void setDriveCommand() {
@@ -88,30 +97,30 @@ public class RobotContainer {
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
+        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation).withRotation(driver::getRightX)
                 .deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Zwerve.SwerveInputStream(swerve, translation).withRotation(driver::getRightX)
-                .deadband(0.05).withHeading(new Rotation2dSupplier(driver::getRightX, driver::getRightY));
+        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation).deadband(0.05)
+                .withHeading(new Rotation2dSupplier(driver::getRightX, driver::getRightY));
 
         /*
           Direct angle input can only be used in field centric mode.
          */
-        this.swerve.setDefaultCommand(
-                this.swerve.driveCommand(directAngleInput, angularVelocityInput, this.swerve.getDirectAngle(),
-                        this.swerve.getFieldCentric()));
+        this.drivetrain.setDefaultCommand(
+                this.drivetrain.driveCommand(directAngleInput, angularVelocityInput, this.drivetrain.getDirectAngle(),
+                        this.drivetrain.getFieldCentric()));
     }
 
     public void toggleFieldCentric() {
-        this.swerve.toggleFieldCentric();
+        this.drivetrain.toggleFieldCentric();
         this.setDriveCommand();
     }
 
-    public void setDirectAngle(boolean directAngle) {
-        this.swerve.setDirectAngle(directAngle);
+    public void toggleDirectAngle() {
+        this.drivetrain.toggleDirectAngle();
         this.setDriveCommand();
     }
 
@@ -171,6 +180,13 @@ public class RobotContainer {
     }
 
     public void setMotorBrake(boolean brake) {
-        swerve.setMotorBrake(brake);
+        drivetrain.setMotorBrake(brake);
+    }
+
+    public void updateDashboard() {
+        //todo
+        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        SmartDashboard.putNumber("Voltage", powerDistribution.getVoltage());
+        SmartDashboard.putData("Drivetrain", drivetrain);
     }
 }
