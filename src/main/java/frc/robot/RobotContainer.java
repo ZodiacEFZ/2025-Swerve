@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.ParentDevice;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -14,9 +15,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.Zwerve;
+import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
+
+import java.util.Collection;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -30,6 +34,8 @@ public class RobotContainer {
     // The robot's subsystems
     private final Zwerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
+
+    private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -67,6 +73,10 @@ public class RobotContainer {
         // Configure default commands
         this.setDirectAngle(true);
         this.setDriveCommand();
+
+        this.musicPlayer.loadMusic(TalonFXMotor.MusicPlayer.Musics.StarWarsMainTheme);
+        Collection<ParentDevice> motors = this.drivetrain.getMotors();
+        this.musicPlayer.setInstrumentAllTracks(motors);
     }
 
     /**
@@ -184,9 +194,9 @@ public class RobotContainer {
     }
 
     public void updateDashboard() {
-        //todo
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         SmartDashboard.putNumber("Voltage", powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", drivetrain);
+        SmartDashboard.putData("Music Player", musicPlayer);
     }
 }
