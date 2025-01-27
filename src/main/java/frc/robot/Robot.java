@@ -6,10 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.ui.elastic.elasticlib.Elastic;
 
 /**
@@ -31,6 +29,14 @@ public class Robot extends TimedRobot {
         // autonomous chooser on the dashboard.
         this.bot = new RobotContainer();
         disabledTimer = new Timer();
+    }
+
+    @Override
+    public void robotInit() {
+    }
+
+    @Override
+    public void driverStationConnected() {
     }
 
     /**
@@ -99,7 +105,7 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-        
+
         this.bot.updateDashboard();
     }
 
@@ -130,5 +136,21 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
+    }
+
+    @Override
+    public void disabledExit() {
+    }
+
+    @Override
+    public void autonomousExit() {
+    }
+
+    @Override
+    public void teleopExit() {
+    }
+
+    @Override
+    public void testExit() {
     }
 }

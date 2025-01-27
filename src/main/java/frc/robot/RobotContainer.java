@@ -52,7 +52,7 @@ public class RobotContainer {
         swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914, true, true);
         swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328, true, true);
 
-        swerveConfig.gyroId = 0;
+        swerveConfig.gyro = 0;
 
         swerveConfig.headingController = new PIDController(0.4, 0.01, 0.01);
         swerveConfig.headingController.setIZone(Math.PI / 4);
@@ -70,7 +70,6 @@ public class RobotContainer {
         this.configureButtonBindings();
 
         this.drivetrain.setFieldCentric(true);
-        // Configure default commands
         this.setDirectAngle(true);
         this.setDriveCommand();
 
@@ -102,19 +101,20 @@ public class RobotContainer {
     }
 
     private void setDriveCommand() {
-        var translation = new Translation2dSupplier(() -> -driver.getLeftY(), () -> -driver.getLeftX());
+        var translation2dSupplier = new Translation2dSupplier(() -> -driver.getLeftY(), () -> -driver.getLeftX());
 
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation).withRotation(driver::getRightX)
+        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).withRotation(
+                        driver::getRightX)
                 .deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation).deadband(0.05)
-                .withHeading(new Rotation2dSupplier(driver::getRightX, driver::getRightY));
+        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).withHeading(
+                new Rotation2dSupplier(() -> -driver.getRightX(), () -> -driver.getRightY())).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
