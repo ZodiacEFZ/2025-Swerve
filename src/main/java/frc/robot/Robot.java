@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +36,10 @@ public class Robot extends TimedRobot {
     public void driverStationConnected() {
         this.bot.musicPlayer().loadMusic("SuperMarioFlag-3.chrp", 3);
         this.bot.musicPlayer().play();
+
+        this.bot.getDriverController().setRumble(GenericHID.RumbleType.kBothRumble, 0.5);
+        Timer.delay(0.5);
+        this.bot.getDriverController().setRumble(GenericHID.RumbleType.kBothRumble, 0.0);
     }
 
     /**

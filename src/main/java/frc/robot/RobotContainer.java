@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.Zwerve;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
+import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
 
@@ -87,7 +88,7 @@ public class RobotContainer {
         driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
         driver.b().onTrue(Commands.none());
         driver.x().onTrue(Commands.none());
-        driver.y().onTrue(Commands.runOnce(drivetrain::zeroHeading));
+        driver.y().onTrue(Commands.runOnce(this::zeroHeading));
         driver.leftBumper().onTrue(Commands.none());
         driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
         driver.start().onTrue(Commands.none());
@@ -125,11 +126,18 @@ public class RobotContainer {
     public void toggleFieldCentric() {
         this.drivetrain.toggleFieldCentric();
         this.setDriveCommand();
+        CommandUtil.rumbleController(driver.getHID(), 0.5, 0.5);
+    }
+
+    private void zeroHeading() {
+        this.drivetrain.zeroHeading();
+        CommandUtil.rumbleController(driver.getHID(), 0.5, 0.5);
     }
 
     public void toggleDirectAngle() {
         this.drivetrain.toggleDirectAngle();
         this.setDriveCommand();
+        CommandUtil.rumbleController(driver.getHID(), 0.3, 0.2);
     }
 
     /**
@@ -200,5 +208,9 @@ public class RobotContainer {
 
     public TalonFXMotor.MusicPlayer musicPlayer() {
         return musicPlayer;
+    }
+
+    public CommandXboxController getDriverController() {
+        return driver;
     }
 }
