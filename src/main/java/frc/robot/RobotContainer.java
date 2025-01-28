@@ -73,9 +73,8 @@ public class RobotContainer {
         this.setDirectAngle(true);
         this.setDriveCommand();
 
-        this.musicPlayer.loadMusic(TalonFXMotor.MusicPlayer.Musics.StarWarsMainTheme);
         Collection<ParentDevice> motors = this.drivetrain.getMotors();
-        this.musicPlayer.setInstrumentAllTracks(motors);
+        this.musicPlayer.addInstrument(motors);
     }
 
     /**
@@ -107,8 +106,7 @@ public class RobotContainer {
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
         var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).withRotation(
-                        driver::getRightX)
-                .deadband(0.05);
+                driver::getRightX).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
@@ -198,5 +196,9 @@ public class RobotContainer {
         SmartDashboard.putNumber("Voltage", powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", drivetrain);
         SmartDashboard.putData("Music Player", musicPlayer);
+    }
+
+    public TalonFXMotor.MusicPlayer musicPlayer() {
+        return musicPlayer;
     }
 }

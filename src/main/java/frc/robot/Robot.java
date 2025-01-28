@@ -32,11 +32,9 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void robotInit() {
-    }
-
-    @Override
     public void driverStationConnected() {
+        this.bot.musicPlayer().loadMusic("SuperMarioFlag-3.chrp", 3);
+        this.bot.musicPlayer().play();
     }
 
     /**
@@ -136,21 +134,5 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
-    }
-
-    @Override
-    public void disabledExit() {
-    }
-
-    @Override
-    public void autonomousExit() {
-    }
-
-    @Override
-    public void teleopExit() {
-    }
-
-    @Override
-    public void testExit() {
     }
 }
