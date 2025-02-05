@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.hardware.ParentDevice;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
@@ -65,7 +66,7 @@ public class RobotContainer {
         swerveConfig.drivePid = new PIDController(0.2, 7.5, 0.0005);
         swerveConfig.anglePid = new PIDController(0.5, 1, 0.0005);
 
-        this.drivetrain = new Zwerve(swerveConfig);
+        this.drivetrain = new Zwerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
 
         // Configure the button bindings
         this.configureButtonBindings();
@@ -119,7 +120,8 @@ public class RobotContainer {
           Direct angle input can only be used in field centric mode.
          */
         this.drivetrain.setDefaultCommand(
-                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain.getDirectAngle(),
+                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput,
+                        this.drivetrain.getDirectAngle(),
                         this.drivetrain.getFieldCentric()));
     }
 
