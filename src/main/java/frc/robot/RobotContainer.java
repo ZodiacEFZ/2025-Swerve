@@ -106,20 +106,20 @@ public class RobotContainer {
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).withRotation(
+        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).rotation(
                 driver::getRightX).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).withHeading(
+        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).heading(
                 new Rotation2dSupplier(() -> -driver.getRightX(), () -> -driver.getRightY())).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
          */
         this.drivetrain.setDefaultCommand(
-                this.drivetrain.driveCommand(directAngleInput, angularVelocityInput, this.drivetrain.getDirectAngle(),
+                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain.getDirectAngle(),
                         this.drivetrain.getFieldCentric()));
     }
 
@@ -206,7 +206,7 @@ public class RobotContainer {
         SmartDashboard.putData("Music Player", musicPlayer);
     }
 
-    public TalonFXMotor.MusicPlayer musicPlayer() {
+    public TalonFXMotor.MusicPlayer getMusicPlayer() {
         return musicPlayer;
     }
 

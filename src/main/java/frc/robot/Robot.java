@@ -34,8 +34,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void driverStationConnected() {
-        this.bot.musicPlayer().loadMusic("SuperMarioFlag-3.chrp", 3);
-        this.bot.musicPlayer().play();
+        this.bot.getMusicPlayer().loadMusic("SuperMarioFlag-3.chrp", 3);
+        this.bot.getMusicPlayer().play();
 
         this.bot.getDriverController().setRumble(GenericHID.RumbleType.kBothRumble, 0.5);
         Timer.delay(0.5);
