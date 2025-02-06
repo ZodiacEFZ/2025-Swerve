@@ -86,14 +86,14 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
-        driver.b().onTrue(Commands.none());
-        driver.x().onTrue(Commands.none());
-        driver.y().onTrue(Commands.runOnce(this::zeroHeading));
-        driver.leftBumper().onTrue(Commands.none());
-        driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
-        driver.start().onTrue(Commands.none());
-        driver.back().whileTrue(Commands.runOnce(drivetrain::centerModules).repeatedly());
+        this.driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
+        this.driver.b().onTrue(Commands.none());
+        this.driver.x().onTrue(Commands.none());
+        this.driver.y().onTrue(Commands.runOnce(this::zeroHeading));
+        this.driver.leftBumper().onTrue(Commands.none());
+        this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
+        this.driver.start().onTrue(Commands.none());
+        this.driver.back().whileTrue(Commands.runOnce(this.drivetrain::centerModules).repeatedly());
     }
 
     public void setDirectAngle(boolean directAngle) {
@@ -102,19 +102,20 @@ public class RobotContainer {
     }
 
     private void setDriveCommand() {
-        var translation2dSupplier = new Translation2dSupplier(() -> -driver.getLeftY(), () -> -driver.getLeftX());
+        var translation2dSupplier = new Translation2dSupplier(() -> -this.driver.getLeftY(),
+                () -> -this.driver.getLeftX());
 
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).rotation(
+        var angularVelocityInput = new Zwerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
                 driver::getRightX).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Zwerve.SwerveInputStream(drivetrain, translation2dSupplier).heading(
-                new Rotation2dSupplier(() -> -driver.getRightX(), () -> -driver.getRightY())).deadband(0.05);
+        var directAngleInput = new Zwerve.InputStream(this.drivetrain, translation2dSupplier).heading(
+                new Rotation2dSupplier(() -> -this.driver.getRightX(), () -> -this.driver.getRightY())).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
@@ -128,18 +129,18 @@ public class RobotContainer {
     public void toggleFieldCentric() {
         this.drivetrain.toggleFieldCentric();
         this.setDriveCommand();
-        CommandUtil.rumbleController(driver.getHID(), 0.5, 0.5);
+        CommandUtil.rumbleController(this.driver.getHID(), 0.5, 0.5);
     }
 
     private void zeroHeading() {
         this.drivetrain.zeroHeading();
-        CommandUtil.rumbleController(driver.getHID(), 0.5, 0.5);
+        CommandUtil.rumbleController(this.driver.getHID(), 0.5, 0.5);
     }
 
     public void toggleDirectAngle() {
         this.drivetrain.toggleDirectAngle();
         this.setDriveCommand();
-        CommandUtil.rumbleController(driver.getHID(), 0.3, 0.2);
+        CommandUtil.rumbleController(this.driver.getHID(), 0.3, 0.2);
     }
 
     /**
@@ -198,21 +199,21 @@ public class RobotContainer {
     }
 
     public void setMotorBrake(boolean brake) {
-        drivetrain.setMotorBrake(brake);
+        this.drivetrain.setMotorBrake(brake);
     }
 
     public void updateDashboard() {
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putNumber("Voltage", powerDistribution.getVoltage());
-        SmartDashboard.putData("Drivetrain", drivetrain);
-        SmartDashboard.putData("Music Player", musicPlayer);
+        SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
+        SmartDashboard.putData("Drivetrain", this.drivetrain);
+        SmartDashboard.putData("Music Player", this.musicPlayer);
     }
 
     public TalonFXMotor.MusicPlayer getMusicPlayer() {
-        return musicPlayer;
+        return this.musicPlayer;
     }
 
     public CommandXboxController getDriverController() {
-        return driver;
+        return this.driver;
     }
 }
