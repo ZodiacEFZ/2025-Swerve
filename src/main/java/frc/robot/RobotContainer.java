@@ -109,7 +109,7 @@ public class RobotContainer {
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
         var angularVelocityInput = new Zwerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
-                driver::getRightX).deadband(0.05);
+                this.driver::getRightX).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
