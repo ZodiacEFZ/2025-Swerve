@@ -10,11 +10,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.Zwerve;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
@@ -37,6 +39,8 @@ public class RobotContainer {
     private final Zwerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
 
+    private final SendableChooser<Command> pathPlannerAutoChooser;
+
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
 
     /**
@@ -47,7 +51,7 @@ public class RobotContainer {
         swerveConfig.ROBOT_WIDTH = 0.7;
         swerveConfig.ROBOT_LENGTH = 0.7;
         swerveConfig.MAX_SPEED = 3;
-        swerveConfig.MAX_ANGULAR_SPEED = 2 * Math.PI;
+        swerveConfig.MAX_ANGULAR_VELOCITY = 2 * Math.PI;
 
         swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, true, true);
         swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 1917, true, true);
@@ -68,12 +72,18 @@ public class RobotContainer {
 
         this.drivetrain = new Zwerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
 
+        PathPlanner.initInstance(this.drivetrain);
+
         // Configure the button bindings
         this.configureButtonBindings();
 
         this.drivetrain.setFieldCentric(true);
-        this.setDirectAngle(true);
+        this.drivetrain.setDirectAngle(true);
         this.setDriveCommand();
+
+        // Build an auto chooser
+        pathPlannerAutoChooser = PathPlanner.getInstance().buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", pathPlannerAutoChooser);
 
         Collection<ParentDevice> motors = this.drivetrain.getMotors();
         this.musicPlayer.addInstrument(motors);
@@ -96,11 +106,6 @@ public class RobotContainer {
         this.driver.back().whileTrue(Commands.runOnce(this.drivetrain::centerModules).repeatedly());
     }
 
-    public void setDirectAngle(boolean directAngle) {
-        this.drivetrain.setDirectAngle(directAngle);
-        this.setDriveCommand();
-    }
-
     private void setDriveCommand() {
         var translation2dSupplier = new Translation2dSupplier(() -> -this.driver.getLeftY(),
                 () -> -this.driver.getLeftX());
@@ -121,14 +126,12 @@ public class RobotContainer {
           Direct angle input can only be used in field centric mode.
          */
         this.drivetrain.setDefaultCommand(
-                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput,
-                        this.drivetrain.getDirectAngle(),
-                        this.drivetrain.getFieldCentric()));
+                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain::getDirectAngle,
+                        this.drivetrain::getFieldCentric));
     }
 
     public void toggleFieldCentric() {
         this.drivetrain.toggleFieldCentric();
-        this.setDriveCommand();
         CommandUtil.rumbleController(this.driver.getHID(), 0.5, 0.5);
     }
 
@@ -139,7 +142,6 @@ public class RobotContainer {
 
     public void toggleDirectAngle() {
         this.drivetrain.toggleDirectAngle();
-        this.setDriveCommand();
         CommandUtil.rumbleController(this.driver.getHID(), 0.3, 0.2);
     }
 
@@ -149,53 +151,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return null;
-        //        public static final class AutoConstants {
-        //            public static final double kMaxSpeedMetersPerSecond = 3;
-        //            public static final double kMaxAccelerationMetersPerSecondSquared = 3;
-        //            public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
-        //            public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-        //
-        //            public static final double kPXController = 1;
-        //            public static final double kPYController = 1;
-        //            public static final double kPThetaController = 1;
-        //
-        //            // Constraint for the motion profiled robot angle controller
-        //            public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
-        //                    kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
-        //        }
-        //        // Create config for trajectory
-        //        TrajectoryConfig config = new TrajectoryConfig(AutoConstants.kMaxSpeedMetersPerSecond,
-        //                AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-        //                // Add kinematics to ensure max speed is actually obeyed
-        //                .setKinematics(DriveConstants.kinematics);
-        //
-        //        // An example trajectory to follow. All units in meters.
-        //        Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        //                // Start at the origin facing the +X direction
-        //                Pose2d.kZero,
-        //                // Pass through these two interior waypoints, making an 's' curve path
-        //                List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-        //                // End 3 meters straight ahead of where we started, facing forward
-        //                new Pose2d(3, 0, Rotation2d.kZero), config);
-        //
-        //        var thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0,
-        //                AutoConstants.kThetaControllerConstraints);
-        //        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        //
-        //        SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(exampleTrajectory,
-        //                chassis::getPose, // Functional interface to feed supplier
-        //                DriveConstants.kinematics,
-        //
-        //                // Position controllers
-        //                new PIDController(AutoConstants.kPXController, 0, 0),
-        //                new PIDController(AutoConstants.kPYController, 0, 0), thetaController, chassis::setModuleStates,
-        //                chassis);
-        //
-        //        // Reset odometry to the initial pose of the trajectory, run path following
-        //        // command, then stop at the end.
-        //        return Commands.sequence(new InstantCommand(() -> chassis.resetOdometry(exampleTrajectory.getInitialPose())),
-        //                swerveControllerCommand, new InstantCommand(() -> chassis.drive(0, 0, 0, false)));
+        return this.pathPlannerAutoChooser.getSelected();
     }
 
     public void setMotorBrake(boolean brake) {
@@ -206,6 +162,7 @@ public class RobotContainer {
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", this.drivetrain);
+        SmartDashboard.putData("Field", this.drivetrain.getField());
         SmartDashboard.putData("Music Player", this.musicPlayer);
     }
 
