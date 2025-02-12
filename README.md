@@ -1,7 +1,5 @@
 # Swerve-dev
 
-A swerve library using TalonFX motor and CTRE MagEncoder with TalonSRX
-
 ## Usage
 ### Clone
 ```
