@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.hardware.ParentDevice;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -92,7 +90,7 @@ public class RobotContainer {
             camera.setWhiteBalanceAuto();
         }
 
-        Collection<ParentDevice> motors = this.drivetrain.getMotors();
+        Collection<TalonFXMotor> motors = this.drivetrain.getTalonFXMotors();
         this.musicPlayer.addInstrument(motors);
     }
 
