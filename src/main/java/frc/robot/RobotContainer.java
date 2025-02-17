@@ -39,7 +39,7 @@ public class RobotContainer {
     private final Swerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
 
-    private final SendableChooser<Command> pathPlannerAutoChooser;
+    private final SendableChooser<Command> autoChooser;
 
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
 
@@ -82,8 +82,8 @@ public class RobotContainer {
         this.setDriveCommand();
 
         // Build an auto chooser
-        pathPlannerAutoChooser = PathPlanner.getInstance().buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", pathPlannerAutoChooser);
+        autoChooser = PathPlanner.getInstance().buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
 
         try (var camera = CameraServer.startAutomaticCapture()) {
             camera.setExposureAuto();
@@ -156,7 +156,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return this.pathPlannerAutoChooser.getSelected();
+        return this.autoChooser.getSelected();
     }
 
     public void setMotorBrake(boolean brake) {
