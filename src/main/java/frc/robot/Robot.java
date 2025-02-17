@@ -34,7 +34,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void driverStationConnected() {
-        this.bot.getMusicPlayer().loadMusic("SuperMarioFlag-3.chrp", 3);
+        this.bot.getMusicPlayer().loadMusic("music/SuperMarioFlag-3.chrp", 3);
         this.bot.getMusicPlayer().play();
 
         this.bot.getDriverController().setRumble(GenericHID.RumbleType.kBothRumble, 0.5);
@@ -57,6 +57,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
+        this.bot.getMusicPlayer().stop();
+
         Elastic.selectTab("Autonomous");
         this.bot.setMotorBrake(true);
 
@@ -85,11 +87,13 @@ public class Robot extends TimedRobot {
             this.autonomousCommand.cancel();
         }
 
+        this.bot.getMusicPlayer().stop();
         Elastic.selectTab("Teleoperated");
     }
 
     @Override
     public void testInit() {
+        this.bot.getMusicPlayer().stop();
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
     }

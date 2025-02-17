@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
-import frc.libzodiac.drivetrain.Zwerve;
+import frc.libzodiac.drivetrain.Swerve;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
@@ -36,7 +36,7 @@ public class RobotContainer {
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
     // The robot's subsystems
-    private final Zwerve drivetrain;
+    private final Swerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
 
     private final SendableChooser<Command> pathPlannerAutoChooser;
@@ -47,30 +47,30 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        Zwerve.Config swerveConfig = new Zwerve.Config();
+        Swerve.Config swerveConfig = new Swerve.Config();
         swerveConfig.ROBOT_WIDTH = 0.7;
         swerveConfig.ROBOT_LENGTH = 0.7;
         swerveConfig.MAX_SPEED = 3;
-        swerveConfig.MAX_ANGULAR_VELOCITY = 2 * Math.PI;
+        swerveConfig.MAX_ANGULAR_VELOCITY = Math.PI;
 
         swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, true, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 1917, true, true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -789, true, true);
         swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914, true, true);
         swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328, true, true);
 
         swerveConfig.gyro = 0;
 
-        swerveConfig.headingController = new PIDController(0.4, 0.01, 0.01);
-        swerveConfig.headingController.setIZone(Math.PI / 4);
+        swerveConfig.headingController = new PIDController(1.75, 0.025, 0.2);
+        swerveConfig.headingController.setIZone(Math.PI / 8);
 
         swerveConfig.ANGLE_GEAR_RATIO = 150.0 / 7.0;
         swerveConfig.DRIVE_GEAR_RATIO = 6.75;
         swerveConfig.WHEEL_RADIUS = 0.05;
 
-        swerveConfig.drivePid = new PIDController(0.2, 7.5, 0.0005);
-        swerveConfig.anglePid = new PIDController(0.5, 1, 0.0005);
+        swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
+        swerveConfig.anglePID = new PIDController(10, 10, 0.01);
 
-        this.drivetrain = new Zwerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
+        this.drivetrain = new Swerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
 
         PathPlanner.initInstance(this.drivetrain);
 
@@ -118,14 +118,14 @@ public class RobotContainer {
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Zwerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
-                this.driver::getRightX).deadband(0.05);
+        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
+                () -> -this.driver.getRightX()).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Zwerve.InputStream(this.drivetrain, translation2dSupplier).heading(
-                new Rotation2dSupplier(() -> -this.driver.getRightX(), () -> -this.driver.getRightY())).deadband(0.05);
+        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(
+                new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX())).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
@@ -168,7 +168,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", this.drivetrain);
         SmartDashboard.putData("Field", this.drivetrain.getField());
-        SmartDashboard.putData("Music Player", this.musicPlayer);
     }
 
     public TalonFXMotor.MusicPlayer getMusicPlayer() {
