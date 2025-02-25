@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
@@ -50,8 +51,8 @@ public class RobotContainer {
         Swerve.Config swerveConfig = new Swerve.Config();
         swerveConfig.ROBOT_WIDTH = 0.7;
         swerveConfig.ROBOT_LENGTH = 0.7;
-        swerveConfig.MAX_SPEED = 3;
-        swerveConfig.MAX_ANGULAR_VELOCITY = Math.PI;
+        swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(3);
+        swerveConfig.MAX_ANGULAR_VELOCITY = Units.RadiansPerSecond.of(Math.PI);
 
         // TODO: tune PID arguments for each swerve module
         swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
