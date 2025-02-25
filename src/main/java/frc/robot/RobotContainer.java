@@ -53,10 +53,22 @@ public class RobotContainer {
         swerveConfig.MAX_SPEED = 3;
         swerveConfig.MAX_ANGULAR_VELOCITY = Math.PI;
 
-        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215, true, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -789, true, true);
-        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914, true, true);
-        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328, true, true);
+        // TODO: tune PID arguments for each swerve module
+        swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
+        swerveConfig.anglePID = new PIDController(10, 10, 0.01);
+
+        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215)
+                .withAngleReversion(true)
+                .withDriveReversion(true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -789)
+                .withAngleReversion(true)
+                .withDriveReversion(true);
+        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914)
+                .withAngleReversion(true)
+                .withDriveReversion(true);
+        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328)
+                .withAngleReversion(true)
+                .withDriveReversion(true);
 
         swerveConfig.gyro = 0;
 
@@ -66,9 +78,6 @@ public class RobotContainer {
         swerveConfig.ANGLE_GEAR_RATIO = 150.0 / 7.0;
         swerveConfig.DRIVE_GEAR_RATIO = 6.75;
         swerveConfig.WHEEL_RADIUS = 0.05;
-
-        swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
-        swerveConfig.anglePID = new PIDController(10, 10, 0.01);
 
         this.drivetrain = new Swerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
 
@@ -112,27 +121,22 @@ public class RobotContainer {
     }
 
     private void setDriveCommand() {
-        var translation2dSupplier = new Translation2dSupplier(() -> -this.driver.getLeftY(),
-                () -> -this.driver.getLeftX());
+        var translation2dSupplier = new Translation2dSupplier(() -> -this.driver.getLeftY(), () -> -this.driver.getLeftX());
 
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
-                () -> -this.driver.getRightX()).deadband(0.05);
+        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).rotation(() -> -this.driver.getRightX()).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(
-                new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX())).deadband(0.05);
+        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX())).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
          */
-        this.drivetrain.setDefaultCommand(
-                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain::getDirectAngle,
-                        this.drivetrain::getFieldCentric));
+        this.drivetrain.setDefaultCommand(this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain::getDirectAngle, this.drivetrain::getFieldCentric));
     }
 
     public void toggleFieldCentric() {
