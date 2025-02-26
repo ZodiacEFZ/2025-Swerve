@@ -47,7 +47,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        this.bot.setMotorBrake(true);
+        this.bot.brake();
         this.disabledTimer.reset();
         this.disabledTimer.start();
     }
@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
         this.bot.getMusicPlayer().stop();
 
         Elastic.selectTab("Autonomous");
-        this.bot.setMotorBrake(true);
+        this.bot.brake();
 
         this.autonomousCommand = this.bot.getAutonomousCommand();
 
@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         if (this.disabledTimer.hasElapsed(1)) {
-            this.bot.setMotorBrake(false);
+            this.bot.shutdown();
             this.disabledTimer.stop();
         }
     }

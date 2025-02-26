@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.Swerve;
+import frc.libzodiac.hardware.Limelight;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
@@ -26,6 +27,7 @@ import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
 
 import java.util.Collection;
+import java.util.stream.IntStream;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -39,6 +41,7 @@ public class RobotContainer {
     // The robot's subsystems
     private final Swerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
+    private final Limelight limelight;
 
     private final SendableChooser<Command> autoChooser;
 
@@ -49,8 +52,8 @@ public class RobotContainer {
      */
     public RobotContainer() {
         Swerve.Config swerveConfig = new Swerve.Config();
-        swerveConfig.ROBOT_WIDTH = 0.7;
-        swerveConfig.ROBOT_LENGTH = 0.7;
+        swerveConfig.ROBOT_WIDTH = Units.Meters.of(0.7);
+        swerveConfig.ROBOT_LENGTH = Units.Meters.of(0.7);
         swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(3);
         swerveConfig.MAX_ANGULAR_VELOCITY = Units.RadiansPerSecond.of(Math.PI);
 
@@ -82,6 +85,10 @@ public class RobotContainer {
         this.drivetrain.setFieldCentric(true);
         this.drivetrain.setDirectAngle(true);
         this.setDriveCommand();
+
+        this.limelight = new Limelight(this.drivetrain);
+        this.limelight.setValidIDs(IntStream.rangeClosed(1, 23).toArray());
+        this.limelight.setPipeline(0);
 
         // Build an auto chooser
         autoChooser = PathPlanner.getInstance().buildAutoChooser();
@@ -149,8 +156,12 @@ public class RobotContainer {
         return this.autoChooser.getSelected();
     }
 
-    public void setMotorBrake(boolean brake) {
-        this.drivetrain.setMotorBrake(brake);
+    public void brake() {
+        this.drivetrain.brake();
+    }
+
+    public void shutdown() {
+        this.drivetrain.shutdown();
     }
 
     public void updateDashboard() {
