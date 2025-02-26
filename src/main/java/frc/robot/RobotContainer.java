@@ -58,18 +58,10 @@ public class RobotContainer {
         swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
         swerveConfig.anglePID = new PIDController(10, 10, 0.01);
 
-        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2215)
-                .withAngleReversion(true)
-                .withDriveReversion(true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, -789)
-                .withAngleReversion(true)
-                .withDriveReversion(true);
-        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1914)
-                .withAngleReversion(true)
-                .withDriveReversion(true);
-        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3328)
-                .withAngleReversion(true)
-                .withDriveReversion(true);
+        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2205, true, true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 3991, true, true);
+        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1884, true, true);
+        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3383, true, true);
 
         swerveConfig.gyro = 0;
 
@@ -95,10 +87,8 @@ public class RobotContainer {
         autoChooser = PathPlanner.getInstance().buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        try (var camera = CameraServer.startAutomaticCapture()) {
-            camera.setExposureAuto();
-            camera.setWhiteBalanceAuto();
-        }
+        //noinspection resource
+//        CameraServer.startAutomaticCapture();
 
         Collection<TalonFXMotor> motors = this.drivetrain.getTalonFXMotors();
         this.musicPlayer.addInstrument(motors);
@@ -112,13 +102,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         this.driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
-        this.driver.b().onTrue(Commands.none());
-        this.driver.x().onTrue(Commands.none());
         this.driver.y().onTrue(Commands.runOnce(this::zeroHeading));
-        this.driver.leftBumper().onTrue(Commands.none());
         this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
-        this.driver.start().onTrue(Commands.none());
-        this.driver.back().whileTrue(Commands.runOnce(this.drivetrain::centerModules).repeatedly());
     }
 
     private void setDriveCommand() {
