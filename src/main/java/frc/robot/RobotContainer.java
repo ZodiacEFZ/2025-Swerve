@@ -88,7 +88,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         //noinspection resource
-//        CameraServer.startAutomaticCapture();
+        CameraServer.startAutomaticCapture();
 
         Collection<TalonFXMotor> motors = this.drivetrain.getTalonFXMotors();
         this.musicPlayer.addInstrument(motors);
