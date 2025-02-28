@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.ui.Elastic;
 
 /**
@@ -35,8 +34,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void driverStationConnected() {
-        TalonFXMotor.MUSIC.loadMusic("music/SuperMarioFlag-3.chrp", 3);
-        TalonFXMotor.MUSIC.play();
+//        this.bot.getMusicPlayer().loadMusic("music/SuperMarioFlag-3.chrp", 3);
+//        this.bot.getMusicPlayer().play();
 
         this.bot.getDriverController().setRumble(GenericHID.RumbleType.kBothRumble, 0.5);
         Timer.delay(0.5);
@@ -58,7 +57,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        TalonFXMotor.MUSIC.stop();
+        this.bot.getMusicPlayer().stop();
 
         Elastic.selectTab("Autonomous");
         this.bot.brake();
@@ -88,13 +87,13 @@ public class Robot extends TimedRobot {
             this.autonomousCommand.cancel();
         }
 
-        TalonFXMotor.MUSIC.stop();
+        this.bot.getMusicPlayer().stop();
         Elastic.selectTab("Teleoperated");
     }
 
     @Override
     public void testInit() {
-        TalonFXMotor.MUSIC.stop();
+        this.bot.getMusicPlayer().stop();
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
     }
