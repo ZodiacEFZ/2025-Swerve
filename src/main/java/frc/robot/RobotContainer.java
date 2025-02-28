@@ -28,7 +28,6 @@ import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
 
-import java.util.Collection;
 import java.util.stream.IntStream;
 
 /*
@@ -46,8 +45,6 @@ public class RobotContainer {
     private final Limelight limelight;
 
     private final SendableChooser<Command> autoChooser;
-
-    private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -100,8 +97,7 @@ public class RobotContainer {
         //noinspection resource
         CameraServer.startAutomaticCapture();
 
-        Collection<TalonFXMotor> motors = this.drivetrain.getTalonFXMotors();
-        this.musicPlayer.addInstrument(motors);
+        for (final var motor : this.drivetrain.getTalonFXMotors()) motor.registerInstrument();
     }
 
     /**
@@ -172,10 +168,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", this.drivetrain);
         SmartDashboard.putData("Field", this.drivetrain.getField());
-    }
-
-    public TalonFXMotor.MusicPlayer getMusicPlayer() {
-        return this.musicPlayer;
     }
 
     public CommandXboxController getDriverController() {
