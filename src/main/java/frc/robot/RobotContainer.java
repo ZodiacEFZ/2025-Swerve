@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.Swerve;
 import frc.libzodiac.hardware.Limelight;
+import frc.libzodiac.hardware.NavX;
+import frc.libzodiac.hardware.Pigeon;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
@@ -54,19 +56,20 @@ public class RobotContainer {
         Swerve.Config swerveConfig = new Swerve.Config();
         swerveConfig.ROBOT_WIDTH = Units.Meters.of(0.7);
         swerveConfig.ROBOT_LENGTH = Units.Meters.of(0.7);
-        swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(3);
+        swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(5);
         swerveConfig.MAX_ANGULAR_VELOCITY = Units.RadiansPerSecond.of(Math.PI);
 
         // TODO: tune PID arguments for each swerve module
         swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
         swerveConfig.anglePID = new PIDController(10, 10, 0.01);
 
-        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2205, true, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 3991, true, true);
-        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1884, true, true);
-        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3383, true, true);
+        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2210, true, true);
+        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 3568, true, true);
+        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1857, true, true);
+        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3369, true, true);
 
-        swerveConfig.gyro = 0;
+        swerveConfig.gyro = new Pigeon(0);
+//        swerveConfig.gyro = new NavX();
 
         swerveConfig.headingController = new PIDController(1.75, 0.025, 0.2);
         swerveConfig.headingController.setIZone(Math.PI / 8);
@@ -87,7 +90,7 @@ public class RobotContainer {
         this.setDriveCommand();
 
         this.limelight = new Limelight(this.drivetrain);
-        this.limelight.setValidIDs(IntStream.rangeClosed(1, 23).toArray());
+        this.limelight.setValidIDs(IntStream.rangeClosed(1, 22).toArray());
         this.limelight.setPipeline(0);
 
         // Build an auto chooser
