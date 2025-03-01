@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.Swerve;
 import frc.libzodiac.hardware.Limelight;
-import frc.libzodiac.hardware.NavX;
 import frc.libzodiac.hardware.Pigeon;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
@@ -78,7 +77,8 @@ public class RobotContainer {
         swerveConfig.DRIVE_GEAR_RATIO = 6.75;
         swerveConfig.WHEEL_RADIUS = 0.05;
 
-        this.drivetrain = new Swerve(swerveConfig, new Pose2d()); //TODO: Set initial pose
+        // Initial pose can be blank because we use PathPlanner to set the initial pose
+        this.drivetrain = new Swerve(swerveConfig, new Pose2d());
 
         PathPlanner.initInstance(this.drivetrain);
 
