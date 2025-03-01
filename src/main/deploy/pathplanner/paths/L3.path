@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.62,
+        "x": 1.603,
         "y": 7.441
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.689445261477429,
-        "y": 6.359828549415796
+        "x": 2.4832073245395847,
+        "y": 6.44334228577875
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 5.004333733863273
       },
       "prevControl": {
-        "x": 3.131194456603458,
-        "y": 5.778568124855342
+        "x": 3.091781329766474,
+        "y": 5.689596966904174
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,10 +45,10 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": "L_Commands",
+  "folder": "[Auto] Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -54.0
   },
   "useDefaultConstraints": true
 }

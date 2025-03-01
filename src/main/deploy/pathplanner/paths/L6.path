@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9990613657251943,
-        "y": 6.141264604877787
+        "x": 2.9803400190496077,
+        "y": 6.141526269060163
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.6483456883919494,
-        "y": 7.479944341208816
+        "x": 1.603,
+        "y": 7.441
       },
       "prevControl": {
-        "x": 2.3376702103036484,
-        "y": 6.859214554356994
+        "x": 2.2861037416660666,
+        "y": 6.806822349950453
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": -54.0
   },
   "reversed": false,
-  "folder": "L_Commands",
+  "folder": "[Auto] Left",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -59.99999999999999
