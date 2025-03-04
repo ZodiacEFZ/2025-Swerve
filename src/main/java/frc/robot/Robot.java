@@ -18,8 +18,8 @@ import frc.libzodiac.ui.Elastic;
  */
 public class Robot extends TimedRobot {
     private final RobotContainer bot;
-    private final Timer          disabledTimer;
-    private       Command        autonomousCommand;
+    private final Timer disabledTimer;
+    private Command autonomousCommand;
 
     /**
      * This function is run when the robot is first started up and should be used for any initialization code.
@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
     public Robot() {
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
-        this.bot           = new RobotContainer();
+        this.bot = new RobotContainer();
         this.disabledTimer = new Timer();
     }
 
