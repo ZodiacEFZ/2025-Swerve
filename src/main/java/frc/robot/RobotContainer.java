@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
@@ -39,7 +40,6 @@ import java.util.stream.IntStream;
 public class RobotContainer {
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
-    // The robot's subsystems
     private final Swerve drivetrain;
     private final PowerDistribution powerDistribution = new PowerDistribution();
     private final Limelight limelight;
@@ -53,8 +53,8 @@ public class RobotContainer {
      */
     public RobotContainer() {
         Swerve.Config swerveConfig = new Swerve.Config();
-        swerveConfig.ROBOT_WIDTH = Units.Meters.of(0.7);
-        swerveConfig.ROBOT_LENGTH = Units.Meters.of(0.7);
+        swerveConfig.ROBOT_WIDTH = Units.Meters.of(0.58255);
+        swerveConfig.ROBOT_LENGTH = Units.Meters.of(0.58255);
         swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(5);
         swerveConfig.MAX_ANGULAR_VELOCITY = Units.RadiansPerSecond.of(Math.PI);
 
@@ -112,6 +112,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         this.driver.a().onTrue(Commands.runOnce(this::toggleFieldCentric));
+        this.driver.b().onTrue(Commands.runOnce(this::toggleSlowMode));
         this.driver.y().onTrue(Commands.runOnce(this::zeroHeading));
         this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
     }
@@ -147,7 +148,12 @@ public class RobotContainer {
 
     public void toggleDirectAngle() {
         this.drivetrain.toggleDirectAngle();
-        CommandUtil.rumbleController(this.driver.getHID(), 0.3, 0.2);
+        CommandUtil.rumbleController(this.driver.getHID(), 0.3, 0.5);
+    }
+
+    private void toggleSlowMode() {
+        this.drivetrain.toggleSlowMode();
+        CommandUtil.rumbleController(this.driver.getHID(), 0.3, 0.5);
     }
 
     /**
