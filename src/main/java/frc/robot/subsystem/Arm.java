@@ -69,14 +69,14 @@ public class Arm extends SubsystemBase {
 
     private Translation2d getStage2Position() {
         return this.getStage1Position()
-                       .plus(new Translation2d(
-                               this.forearmLength.times(Math.cos(this.getStage2Angle().in(Units.Radians))),
-                               this.forearmLength.times(Math.sin(this.getStage2Angle().in(Units.Radians)))));
+                   .plus(new Translation2d(this.forearmLength.times(Math.cos(this.getStage2Angle().in(Units.Radians))),
+                                           this.forearmLength.times(
+                                                   Math.sin(this.getStage2Angle().in(Units.Radians)))));
     }
 
     private Translation2d getStage1Position() {
         return new Translation2d(this.posteriorArmLength.times(Math.cos(this.getStage1Angle().in(Units.Radians))),
-                this.posteriorArmLength.times(Math.sin(this.getStage1Angle().in(Units.Radians))));
+                                 this.posteriorArmLength.times(Math.sin(this.getStage1Angle().in(Units.Radians))));
     }
 
     private Angle getStage2Angle() {
@@ -134,7 +134,7 @@ public class Arm extends SubsystemBase {
         double theta1, theta2;
         theta2 = rightHand ? Math.atan2(sinTheta2, cosTheta2) : Math.atan2(-sinTheta2, cosTheta2);
         theta1 = Math.atan2(stage2Position.getY(), stage2Position.getX()) -
-                         Math.atan2(l2 * sinTheta2, l1 + l2 * cosTheta2);
+                 Math.atan2(l2 * sinTheta2, l1 + l2 * cosTheta2);
         return new Pair<>(Units.Radians.of(theta1), Units.Radians.of(theta2));
     }
 
