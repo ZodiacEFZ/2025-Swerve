@@ -59,29 +59,29 @@ public class RobotContainer {
                 .withDrive(5)
                 .withEncoder(9)
                 .withEncoderZero(2210)
-                .withAngleReversed(true)
-                .withDriveReversed(true);
+                .withAngleInverted(true)
+                .withDriveInverted(true);
         final var rearLeft = new TalonFXSwerveModule.Config()
                 .withAngle(2)
                 .withDrive(6)
                 .withEncoder(10)
                 .withEncoderZero(3568)
-                .withAngleReversed(true)
-                .withDriveReversed(true);
+                .withAngleInverted(true)
+                .withDriveInverted(true);
         final var frontRight = new TalonFXSwerveModule.Config()
                 .withAngle(4)
                 .withDrive(8)
                 .withEncoder(12)
                 .withEncoderZero(1857)
-                .withAngleReversed(true)
-                .withDriveReversed(true);
+                .withAngleInverted(true)
+                .withDriveInverted(true);
         final var rearRight = new TalonFXSwerveModule.Config()
                 .withAngle(3)
                 .withDrive(7)
                 .withEncoder(11)
                 .withEncoderZero(3369)
-                .withAngleReversed(true)
-                .withDriveReversed(true);
+                .withAngleInverted(true)
+                .withDriveInverted(true);
 
         final var heading = new PIDController(1.75, 0.025, 0.2);
         heading.setIZone(Math.PI / 8);
