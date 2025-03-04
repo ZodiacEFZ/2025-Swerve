@@ -38,10 +38,10 @@ import java.util.stream.IntStream;
  */
 public class RobotContainer {
     // The driver's controller
-    private final CommandXboxController driver            = new CommandXboxController(0);
-    private final Swerve                drivetrain;
-    private final PowerDistribution     powerDistribution = new PowerDistribution();
-    private final Limelight             limelight;
+    private final CommandXboxController driver = new CommandXboxController(0);
+    private final Swerve drivetrain;
+    private final PowerDistribution powerDistribution = new PowerDistribution();
+    private final Limelight limelight;
 
     private final SendableChooser<Command> autoChooser;
 

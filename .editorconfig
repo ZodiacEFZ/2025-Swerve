@@ -1,6 +1,5 @@
 [*]
 charset = utf-8
-end_of_line = crlf
 indent_size = 4
 indent_style = space
 insert_final_newline = false
@@ -38,9 +37,9 @@ ij_css_value_alignment = do_not_align
 ij_declarative_keep_indents_on_empty_lines = false
 
 [*.java]
-ij_java_align_consecutive_assignments = true
-ij_java_align_consecutive_variable_declarations = true
-ij_java_align_group_field_declarations = true
+ij_java_align_consecutive_assignments = false
+ij_java_align_consecutive_variable_declarations = false
+ij_java_align_group_field_declarations = false
 ij_java_align_multiline_annotation_parameters = true
 ij_java_align_multiline_array_initializer_expression = true
 ij_java_align_multiline_assignment = false
@@ -58,7 +57,7 @@ ij_java_align_multiline_resources = true
 ij_java_align_multiline_ternary_operation = false
 ij_java_align_multiline_text_blocks = true
 ij_java_align_multiline_throws_list = true
-ij_java_align_subsequent_simple_methods = true
+ij_java_align_subsequent_simple_methods = false
 ij_java_align_throws_keyword = false
 ij_java_align_types_in_multi_catch = true
 ij_java_annotation_parameter_wrap = normal
