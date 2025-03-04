@@ -52,33 +52,58 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        Swerve.Config swerveConfig = new Swerve.Config();
-        swerveConfig.ROBOT_WIDTH = Units.Meters.of(0.58255);
-        swerveConfig.ROBOT_LENGTH = Units.Meters.of(0.58255);
-        swerveConfig.MAX_SPEED = Units.MetersPerSecond.of(5);
-        swerveConfig.MAX_ANGULAR_VELOCITY = Units.RadiansPerSecond.of(Math.PI);
-
         // TODO: tune PID arguments for each swerve module
-        swerveConfig.drivePID = new PIDController(0.2, 7.5, 0.0005);
-        swerveConfig.anglePID = new PIDController(10, 10, 0.01);
+        final var frontLeft = new TalonFXSwerveModule.Config()
+                .withAngle(1)
+                .withDrive(5)
+                .withEncoder(9)
+                .withEncoderZero(2210)
+                .withAngleInverted(true)
+                .withDriveInverted(true);
+        final var rearLeft = new TalonFXSwerveModule.Config()
+                .withAngle(2)
+                .withDrive(6)
+                .withEncoder(10)
+                .withEncoderZero(3568)
+                .withAngleInverted(true)
+                .withDriveInverted(true);
+        final var frontRight = new TalonFXSwerveModule.Config()
+                .withAngle(4)
+                .withDrive(8)
+                .withEncoder(12)
+                .withEncoderZero(1857)
+                .withAngleInverted(true)
+                .withDriveInverted(true);
+        final var rearRight = new TalonFXSwerveModule.Config()
+                .withAngle(3)
+                .withDrive(7)
+                .withEncoder(11)
+                .withEncoderZero(3369)
+                .withAngleInverted(true)
+                .withDriveInverted(true);
 
-        swerveConfig.frontLeft = new TalonFXSwerveModule.Config(1, 5, 9, 2210, true, true);
-        swerveConfig.rearLeft = new TalonFXSwerveModule.Config(2, 6, 10, 3568, true, true);
-        swerveConfig.frontRight = new TalonFXSwerveModule.Config(4, 8, 12, 1857, true, true);
-        swerveConfig.rearRight = new TalonFXSwerveModule.Config(3, 7, 11, 3369, true, true);
+        final var heading = new PIDController(1.75, 0.025, 0.2);
+        heading.setIZone(Math.PI / 8);
 
-        swerveConfig.gyro = new Pigeon(0);
-//        swerveConfig.gyro = new NavX();
-
-        swerveConfig.headingController = new PIDController(1.75, 0.025, 0.2);
-        swerveConfig.headingController.setIZone(Math.PI / 8);
-
-        swerveConfig.ANGLE_GEAR_RATIO = 150.0 / 7.0;
-        swerveConfig.DRIVE_GEAR_RATIO = 6.75;
-        swerveConfig.WHEEL_RADIUS = 0.05;
-
-        // Initial pose can be blank because we use PathPlanner to set the initial pose
-        this.drivetrain = new Swerve(swerveConfig, new Pose2d());
+        this.drivetrain = new Swerve.Config()
+                .withRobotWidth(Units.Meters.of(0.7))
+                .withRobotLength(Units.Meters.of(0.7))
+                .withMaxSpeed(Units.MetersPerSecond.of(5))
+                .withMaxAngularVelocity(Units.RadiansPerSecond.of(Math.PI))
+                .withFrontLeft(frontLeft)
+                .withFrontRight(frontRight)
+                .withRearLeft(rearLeft)
+                .withRearRight(rearRight)
+                .withDrivePID(new PIDController(0.2, 7.5, 0.0005))
+                .withAnglePID(new PIDController(10, 10, 0.01))
+                .withGyro(new Pigeon(0))
+                .withHeadingPID(heading)
+                .withDriveGearRatio(6.75)
+                .withAngleGearRatio(150.0 / 7.0)
+                .withWheelRadius(Units.Millimeter.of(50))
+                // Initial pose can be blank because we use PathPlanner to set the initial pose
+                .withInitialPose(new Pose2d())
+                .build();
 
         PathPlanner.initInstance(this.drivetrain);
 
@@ -123,12 +148,15 @@ public class RobotContainer {
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).rotation(() -> -this.driver.getRightX()).deadband(0.05);
+        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier)
+                .rotation(() -> -this.driver.getRightX()).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX())).deadband(0.05);
+        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier)
+                .heading(new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX()))
+                .deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
