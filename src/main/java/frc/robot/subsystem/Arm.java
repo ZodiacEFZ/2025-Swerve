@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.libzodiac.hardware.SparkMaxMotor;
 import frc.libzodiac.hardware.TalonSRXMotor;
@@ -116,19 +117,6 @@ public class Arm extends SubsystemBase {
         double l1 = this.posteriorArmLength.in(Units.Meters);
         double l2 = this.forearmLength.in(Units.Meters);
 
-//        double theta0 = Math.atan2(stage2Position.getY(), stage2Position.getX());
-//        double delta1 = Math.acos((l0 * l0 + l1 * l1 - l2 * l2) / (2 * l0 * l1));
-//        double delta2 = Math.acos((l0 * l0 - l1 * l1 + l2 * l2) / (2 * l0 * l2));
-//        if (upper) {
-//            double theta1 = theta0 + delta1;
-//            double theta2 = theta0 - theta1 - delta2;
-//            if (theta1 < Math.PI) {
-//                return new Pair<>(Units.Radians.of(theta1), Units.Radians.of(theta2));
-//            }
-//        }
-//        double theta1 = theta0 - delta1;
-//        double theta2 = theta0 - theta1 + delta2;
-
         double cosTheta2 = (l0 * l0 - l1 * l1 - l2 * l2) / (2 * l1 * l2);
         double sinTheta2 = Math.sqrt(1 - cosTheta2 * cosTheta2);
         double theta1, theta2;
@@ -138,7 +126,23 @@ public class Arm extends SubsystemBase {
         return new Pair<>(Units.Radians.of(theta1), Units.Radians.of(theta2));
     }
 
-    public void moveTo(Translation2d position) {
+    @Override
+    public void periodic() {
+        // TODO: Implement the control logic to move the arm to the target position.
+        Translation2d deltaPosition = this.targetPose.getTranslation().minus(this.getPosition());
+        this.wrist.MAXMotionPosition(this.targetPose.getRotation().getMeasure());
+    }
+
+    public Command getMoveToClimbCommand() {
+        return runOnce(this::moveToClimb);
+    }
+
+    private void moveToClimb() {
+        this.moveTo(Position.CLIMB.pose);
+    }
+
+    public void moveTo(Pose2d pose) {
+        var position = pose.getTranslation();
         if (!this.isWithinPositionLimit(position)) {
             return;
         }
@@ -149,10 +153,22 @@ public class Arm extends SubsystemBase {
         return this.positionLimit.contains(position);
     }
 
-    @Override
-    public void periodic() {
-        // TODO: Implement the control logic to move the arm to the target position.
-        Translation2d deltaPosition = this.targetPose.getTranslation().minus(this.getPosition());
-        this.wrist.MAXMotionPosition(this.targetPose.getRotation().getMeasure());
+    enum Position {
+        // TODO Add the positions of the arm.
+        START(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true),
+        CLIMB(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true),
+        INTAKE(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), false),
+        L1(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true),
+        L2(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true),
+        L3(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true),
+        L4(new Pose2d(new Translation2d(0.2, 0.24), new Rotation2d()), true);
+
+        private final Pose2d pose;
+        private final boolean rightHand;
+
+        Position(Pose2d pose, boolean rightHand) {
+            this.pose = pose;
+            this.rightHand = rightHand;
+        }
     }
 }

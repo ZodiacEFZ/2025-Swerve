@@ -26,6 +26,7 @@ import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
+import frc.robot.subsystem.Arm;
 import frc.robot.subsystem.Climber;
 import frc.robot.subsystem.Intake;
 
@@ -44,6 +45,7 @@ public class RobotContainer {
     private final Swerve drivetrain;
     private final Intake intake = new Intake();
     private final PowerDistribution powerDistribution = new PowerDistribution();
+    private final Arm arm;
     private final Limelight limelight;
     private final SendableChooser<Command> autoChooser;
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
@@ -135,7 +137,7 @@ public class RobotContainer {
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
         this.driver.back().onTrue(Commands.runOnce(this::zeroHeading));
         this.driver.start().onTrue(Commands.runOnce(this::toggleFieldCentric));
-        this.driver.leftBumper().onTrue(this.climber.getClimbCommand());
+        this.driver.leftBumper().onTrue(this.climber.getClimbCommand()).onTrue(this.arm.getMoveToClimbCommand());
         this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
         this.driver.leftTrigger().onTrue(this.intake.getOuttakeCommand()).onFalse(this.intake.getStopCommand());
         this.driver.rightTrigger().onTrue(this.intake.getIntakeCommand()).onFalse(this.intake.getStopCommand());
@@ -209,7 +211,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
         SmartDashboard.putData("Drivetrain", this.drivetrain);
         SmartDashboard.putData("Field", this.drivetrain.getField());
-        SmartDashboard.putData("Climber", this.climber);
     }
 
     public TalonFXMotor.MusicPlayer getMusicPlayer() {
