@@ -1,29 +1,27 @@
 package frc.robot.subsystem;
 
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.libzodiac.hardware.TalonSRXMotor;
+import frc.libzodiac.hardware.MagEncoder;
+import frc.libzodiac.hardware.TalonFXMotor;
 
 public class Climber extends SubsystemBase {
-    private final TalonSRXMotor climberMotor = new TalonSRXMotor(30);
+    private final MagEncoder encoder = new MagEncoder(30, -942);
+    private final TalonFXMotor motor = new TalonFXMotor(31);
     private Position position = Position.DOWN;
 
     public Climber() {
-        this.climberMotor.factoryDefault();
-        this.climberMotor.setSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
-        this.climberMotor.setPhase(false);
-        this.climberMotor.setEncoderZero(-942);
-        this.climberMotor.setInverted(true);
+        this.encoder.setInverted(true);
+        this.motor.factoryDefault();
         var climberPID = new PIDController(0.5, 0.001, 0.01);
-        climberPID.setIZone(200);
-        this.climberMotor.setPID(climberPID);
-        this.climberMotor.setBrakeWhenNeutral(true);
-        this.climberMotor.setSoftwareLimitSwitch(Position.DOWN.position, Position.CLIMB.position);
+        this.motor.setPID(climberPID);
+        this.motor.setBrakeWhenNeutral(true);
+        this.motor.setSensorToMechanismRatio(200);
+        this.motor.setRelativeEncoderPosition(this.encoder.get());
+        this.motor.setSoftwareLimitSwitch(Position.DOWN.position, Position.CLIMB.position);
     }
 
     public Command getDownCommand() {
@@ -31,7 +29,7 @@ public class Climber extends SubsystemBase {
     }
 
     public void down() {
-        this.climberMotor.setPosition(Position.DOWN.position);
+        this.motor.setPosition(Position.DOWN.position);
         this.position = Position.DOWN;
     }
 
@@ -40,7 +38,7 @@ public class Climber extends SubsystemBase {
     }
 
     public void up() {
-        this.climberMotor.setPosition(Position.UP.position);
+        this.motor.setPosition(Position.UP.position);
         this.position = Position.UP;
     }
 
@@ -49,19 +47,12 @@ public class Climber extends SubsystemBase {
     }
 
     public void climb() {
-        this.climberMotor.setPosition(Position.CLIMB.position);
+        this.motor.setPosition(Position.CLIMB.position);
         this.position = Position.CLIMB;
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Climber");
-        builder.setActuator(true);
-        builder.addDoubleProperty("Position", () -> this.getPosition().in(Units.Radians), null);
-    }
-
     private Angle getPosition() {
-        return this.climberMotor.getPosition();
+        return this.motor.getPosition();
     }
 
     public Command getSwitchClimberStateCommand() {

@@ -45,7 +45,7 @@ public class RobotContainer {
     private final Swerve drivetrain;
     private final Intake intake = new Intake();
     private final PowerDistribution powerDistribution = new PowerDistribution();
-    private final Arm arm;
+    private final Arm arm = new Arm();
     private final Limelight limelight;
     private final SendableChooser<Command> autoChooser;
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
