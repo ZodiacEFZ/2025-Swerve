@@ -15,6 +15,7 @@ public class Climber extends SubsystemBase {
 
     public Climber() {
         this.encoder.setInverted(true);
+        this.encoder.setContinuous(false);
         this.motor.factoryDefault();
         var climberPID = new PIDController(0.5, 0.001, 0.01);
         this.motor.setPID(climberPID);
