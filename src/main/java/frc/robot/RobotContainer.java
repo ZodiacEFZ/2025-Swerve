@@ -7,7 +7,10 @@ package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,6 +33,7 @@ import frc.robot.subsystem.Arm;
 import frc.robot.subsystem.Climber;
 import frc.robot.subsystem.Intake;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.IntStream;
 
@@ -39,7 +43,7 @@ import java.util.stream.IntStream;
  * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
  * (including subsystems, commands, and button mappings) should be declared here.
  */
-public class RobotContainer {
+public class RobotContainer implements Sendable {
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Swerve drivetrain;
@@ -50,6 +54,8 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
     private final Climber climber = new Climber();
+
+    private boolean autoHeading = false;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -133,21 +139,51 @@ public class RobotContainer {
      * {@link XboxController}), and then calling passing it to a {@link JoystickButton}.
      */
     private void configureButtonBindings() {
+        // Drivetrain
+        this.driver.a().onTrue(Commands.runOnce(this::toggleAutoHeading));
         this.driver.x().onTrue(Commands.runOnce(this::toggleSlowMode));
-        this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
         this.driver.back().onTrue(Commands.runOnce(this::zeroHeading));
         this.driver.start().onTrue(Commands.runOnce(this::toggleFieldCentric));
-        this.driver.leftBumper().onTrue(this.climber.getClimbCommand()).onTrue(this.arm.getMoveToClimbCommand());
         this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
+        this.driver.povLeft()
+                   .onTrue(Commands.runOnce(
+                           () -> this.drivetrain.setTargetHeading(new Rotation2d(Units.Degrees.of(-54)))));
+        this.driver.povRight()
+                   .onTrue(Commands.runOnce(
+                           () -> this.drivetrain.setTargetHeading(new Rotation2d(Units.Degrees.of(54)))));
+
+        // Intake
         this.driver.leftTrigger().onTrue(this.intake.getOuttakeCommand()).onFalse(this.intake.getStopCommand());
         this.driver.rightTrigger().onTrue(this.intake.getIntakeCommand()).onFalse(this.intake.getStopCommand());
-        //pov
-        //ab
+
+        //Climber
+        this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
+        this.driver.leftBumper().onTrue(this.climber.getClimbCommand()).onTrue(this.arm.getMoveToClimbCommand());
+
+        this.driver.povUp();
+        this.driver.povDown();
+        this.driver.b();
     }
 
     private void setDriveCommand() {
         var translation2dSupplier = new Translation2dSupplier(() -> -this.driver.getLeftY(),
                                                               () -> -this.driver.getLeftX());
+
+        Rotation2dSupplier headingSupplier = new Rotation2dSupplier(() -> {
+            var heading = new Rotation2d(-this.driver.getRightY(), -this.driver.getRightX());
+            if (this.autoHeading) {
+                var headings = new Rotation2d[]{
+                        new Rotation2d(0), new Rotation2d(Math.PI / 3), new Rotation2d(Math.PI * 2 / 3),
+                        new Rotation2d(Math.PI), new Rotation2d(-Math.PI * 2 / 3), new Rotation2d(-Math.PI / 3)
+                };
+                return Arrays.stream(headings).min((a, b) -> {
+                    var a0 = a.minus(heading).getMeasure().abs(Units.Radians);
+                    var b0 = b.minus(heading).getMeasure().abs(Units.Radians);
+                    return Double.compare(a0, b0);
+                }).get();
+            }
+            return heading;
+        });
 
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
@@ -158,8 +194,8 @@ public class RobotContainer {
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(
-                new Rotation2dSupplier(() -> -this.driver.getRightY(), () -> -this.driver.getRightX())).deadband(0.05);
+        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(headingSupplier)
+                                                                                             .deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
@@ -167,6 +203,10 @@ public class RobotContainer {
         this.drivetrain.setDefaultCommand(
                 this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain::getDirectAngle,
                                                 this.drivetrain::getFieldCentric));
+    }
+
+    private void toggleAutoHeading() {
+        this.autoHeading = !this.autoHeading;
     }
 
     private void toggleSlowMode() {
@@ -206,18 +246,24 @@ public class RobotContainer {
         this.drivetrain.shutdown();
     }
 
-    public void updateDashboard() {
-        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
-        SmartDashboard.putData("Drivetrain", this.drivetrain);
-        SmartDashboard.putData("Field", this.drivetrain.getField());
-    }
-
     public TalonFXMotor.MusicPlayer getMusicPlayer() {
         return this.musicPlayer;
     }
 
     public CommandXboxController getDriverController() {
         return this.driver;
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("Robot");
+        builder.setActuator(true);
+        builder.addBooleanProperty("Auto Heading", () -> this.autoHeading,
+                                   (autoHeading) -> this.autoHeading = autoHeading);
+
+        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
+        SmartDashboard.putData("Drivetrain", this.drivetrain);
+        SmartDashboard.putData("Field", this.drivetrain.getField());
     }
 }
