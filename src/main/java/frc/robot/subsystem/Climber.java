@@ -1,15 +1,17 @@
 package frc.robot.subsystem;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.libzodiac.hardware.MagEncoder;
 import frc.libzodiac.hardware.TalonFXMotor;
 
 public class Climber extends SubsystemBase {
-    private final MagEncoder encoder = new MagEncoder(30, -942);
+    private final MagEncoder encoder = new MagEncoder(30, 0);
     private final TalonFXMotor motor = new TalonFXMotor(31);
     private Position position = Position.DOWN;
 
@@ -17,12 +19,24 @@ public class Climber extends SubsystemBase {
         this.encoder.setInverted(true);
         this.encoder.setContinuous(false);
         this.motor.factoryDefault();
-        var climberPID = new PIDController(0.5, 0.001, 0.01);
+        var climberPID = new PIDController(75, 1, 0);
         this.motor.setPID(climberPID);
         this.motor.setBrakeWhenNeutral(true);
         this.motor.setSensorToMechanismRatio(200);
-        this.motor.setRelativeEncoderPosition(this.encoder.get());
+        var encoderAngle = this.encoder.get().in(Units.Radians);
+        var angle = new Rotation2d(Math.cos(encoderAngle), Math.sin(encoderAngle)).getMeasure();
+        this.motor.setRelativeEncoderPosition(
+                angle.in(Units.Radians) < 0 ? angle.plus(Units.Radians.of(Math.PI * 2)) : angle);
         this.motor.setSoftwareLimitSwitch(Position.DOWN.position, Position.CLIMB.position);
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("climber", this.getPosition().in(Units.Radians));
+    }
+
+    private Angle getPosition() {
+        return this.motor.getPosition();
     }
 
     public Command getDownCommand() {
@@ -50,10 +64,6 @@ public class Climber extends SubsystemBase {
     public void climb() {
         this.motor.setPosition(Position.CLIMB.position);
         this.position = Position.CLIMB;
-    }
-
-    private Angle getPosition() {
-        return this.motor.getPosition();
     }
 
     public Command getSwitchClimberStateCommand() {
