@@ -11,7 +11,7 @@ import frc.libzodiac.hardware.MagEncoder;
 import frc.libzodiac.hardware.TalonFXMotor;
 
 public class Climber extends SubsystemBase {
-    private final MagEncoder encoder = new MagEncoder(30, 0);
+    private final MagEncoder encoder = new MagEncoder(30, -335);
     private final TalonFXMotor motor = new TalonFXMotor(31);
     private Position position = Position.DOWN;
 
@@ -78,7 +78,7 @@ public class Climber extends SubsystemBase {
         }
     }
 
-    enum Position {
+    private enum Position {
         DOWN(0),
         UP(1.4),
         CLIMB(4);
