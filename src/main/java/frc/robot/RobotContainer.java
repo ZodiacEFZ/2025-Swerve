@@ -158,7 +158,9 @@ public class RobotContainer implements Sendable {
 
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
-        this.driver.leftBumper().onTrue(this.climber.getClimbCommand()).onTrue(this.arm.getMoveToClimbCommand());
+        this.driver.leftBumper()
+                   .onTrue(this.climber.getClimbCommand())
+                   .onTrue(this.arm.follow(Constants.TRAJ_IDLE_TO_CLIMB));
 
         this.driver.povUp();
         this.driver.povDown();
