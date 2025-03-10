@@ -8,7 +8,7 @@
         "layouts": [
           {
             "title": "Drivetrain",
-            "x": 0.0,
+            "x": 576.0,
             "y": 384.0,
             "width": 256.0,
             "height": 384.0,
@@ -44,6 +44,19 @@
                 }
               },
               {
+                "title": "Slow Mode",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/SmartDashboard/Drivetrain/Slow Mode",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
                 "title": "Reset Heading",
                 "x": 1152.0,
                 "y": 128.0,
@@ -62,7 +75,7 @@
         "containers": [
           {
             "title": "Voltage",
-            "x": 0.0,
+            "x": 320.0,
             "y": 192.0,
             "width": 320.0,
             "height": 192.0,
@@ -80,7 +93,7 @@
           },
           {
             "title": "Match Time",
-            "x": 0.0,
+            "x": 320.0,
             "y": 0.0,
             "width": 320.0,
             "height": 192.0,
@@ -96,10 +109,10 @@
           },
           {
             "title": "Field",
-            "x": 320.0,
+            "x": 0.0,
             "y": 0.0,
-            "width": 832.0,
-            "height": 384.0,
+            "width": 320.0,
+            "height": 768.0,
             "type": "Field",
             "properties": {
               "topic": "/SmartDashboard/Field",
@@ -109,15 +122,15 @@
               "robot_length": 0.85,
               "show_other_objects": true,
               "show_trajectories": true,
-              "field_rotation": 0.0,
+              "field_rotation": -90.0,
               "robot_color": 4294198070,
               "trajectory_color": 4294967295
             }
           },
           {
             "title": "Auto Chooser",
-            "x": 1280.0,
-            "y": 384.0,
+            "x": 320.0,
+            "y": 640.0,
             "width": 256.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
@@ -129,7 +142,7 @@
           },
           {
             "title": "Swerve Drive",
-            "x": 256.0,
+            "x": 320.0,
             "y": 384.0,
             "width": 256.0,
             "height": 256.0,
@@ -152,6 +165,76 @@
               "topic": "/CameraPublisher/limelight",
               "period": 0.06,
               "rotation_turns": 0
+            }
+          },
+          {
+            "title": "climber",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/climber",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "climber-encoder",
+            "x": 640.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/climber-encoder",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "stage2",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/stage2",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "stage2-encoder",
+            "x": 896.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/stage2-encoder",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "wrist",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/wrist",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
             }
           }
         ]
