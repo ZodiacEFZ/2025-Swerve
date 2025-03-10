@@ -4,13 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.libzodiac.hardware.LEDController;
 import frc.libzodiac.ui.Elastic;
+import frc.libzodiac.util.GameUtil;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in the TimedRobot
@@ -26,10 +31,11 @@ public class Robot extends TimedRobot {
      * This function is run when the robot is first started up and should be used for any initialization code.
      */
     public Robot() {
-        // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        // autonomous chooser on the dashboard.
         this.bot = new RobotContainer();
         this.disabledTimer = new Timer();
+        LEDController.initInstance(0, 120);
+        LEDController.getInstance().add("LED0", 0, 119);
+//        LEDController.getInstance().add("LED1", 120, 179);
     }
 
     @Override
@@ -122,6 +128,10 @@ public class Robot extends TimedRobot {
             this.bot.shutdown();
             this.disabledTimer.stop();
         }
+
+        var pattern = LEDPattern.solid(GameUtil.isRedAlliance() ? Color.kFirstRed : Color.kFirstBlue)
+                                .breathe(Units.Seconds.of(4));
+        LEDController.getInstance().applyAll(pattern);
     }
 
     /**

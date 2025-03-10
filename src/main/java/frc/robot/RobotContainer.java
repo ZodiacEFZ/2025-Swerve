@@ -22,14 +22,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.Swerve;
-import frc.libzodiac.hardware.Limelight;
-import frc.libzodiac.hardware.Pigeon;
-import frc.libzodiac.hardware.TalonFXMotor;
+import frc.libzodiac.hardware.*;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
-import frc.robot.subsystem.Arm;
+import frc.robot.subsystem.ArmStage2;
 import frc.robot.subsystem.Climber;
 import frc.robot.subsystem.Intake;
 
@@ -49,7 +47,8 @@ public class RobotContainer implements Sendable {
     private final Swerve drivetrain;
     private final Intake intake = new Intake();
     private final PowerDistribution powerDistribution = new PowerDistribution();
-    private final Arm arm = new Arm();
+    //    private final Arm arm = new Arm();
+    private final ArmStage2 armStage2 = new ArmStage2();
     private final Limelight limelight;
     private final SendableChooser<Command> autoChooser;
     private final TalonFXMotor.MusicPlayer musicPlayer = new TalonFXMotor.MusicPlayer();
@@ -64,26 +63,22 @@ public class RobotContainer implements Sendable {
         // TODO: tune PID arguments for each swerve module
         final var frontLeft = new TalonFXSwerveModule.Config().withAngle(1)
                                                               .withDrive(5)
-                                                              .withEncoder(9)
-                                                              .withEncoderZero(2210)
+                                                              .withEncoder(new CANCoder(9, 0.294678))
                                                               .withAngleInverted(true)
                                                               .withDriveInverted(true);
         final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
                                                              .withDrive(6)
-                                                             .withEncoder(10)
-                                                             .withEncoderZero(3568)
+                                                             .withEncoder(new CANCoder(10, -0.251709))
                                                              .withAngleInverted(true)
                                                              .withDriveInverted(true);
         final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
                                                                .withDrive(8)
-                                                               .withEncoder(12)
-                                                               .withEncoderZero(1857)
+                                                               .withEncoder(new CANCoder(12, 0.035645))
                                                                .withAngleInverted(true)
                                                                .withDriveInverted(true);
         final var rearRight = new TalonFXSwerveModule.Config().withAngle(3)
                                                               .withDrive(7)
-                                                              .withEncoder(11)
-                                                              .withEncoderZero(3369)
+                                                              .withEncoder(new CANCoder(11, 0.566162))
                                                               .withAngleInverted(true)
                                                               .withDriveInverted(true);
 
@@ -100,7 +95,7 @@ public class RobotContainer implements Sendable {
                                              .withRearRight(rearRight)
                                              .withDrivePID(new PIDController(0.2, 7.5, 0.0005))
                                              .withAnglePID(new PIDController(10, 10, 0.01))
-                                             .withGyro(new Pigeon(0))
+                                             .withGyro(new Pigeon(13))
                                              .withHeadingPID(heading)
                                              .withDriveGearRatio(6.75)
                                              .withAngleGearRatio(150.0 / 7.0)
@@ -158,9 +153,8 @@ public class RobotContainer implements Sendable {
 
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
-        this.driver.leftBumper()
-                   .onTrue(this.climber.getClimbCommand())
-                   .onTrue(this.arm.follow(Constants.TRAJ_IDLE_TO_CLIMB));
+        this.driver.leftBumper().onTrue(this.climber.getClimbCommand());
+//                   .onTrue(this.arm.follow(Constants.TRAJ_IDLE_TO_CLIMB));
 
         this.driver.povUp();
         this.driver.povDown();
