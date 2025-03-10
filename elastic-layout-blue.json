@@ -123,21 +123,8 @@
               "show_other_objects": true,
               "show_trajectories": true,
               "field_rotation": -90.0,
-              "robot_color": 4294198070,
+              "robot_color": 4278216371,
               "trajectory_color": 4294967295
-            }
-          },
-          {
-            "title": "Auto Chooser",
-            "x": 320.0,
-            "y": 640.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Chooser",
-              "period": 0.06,
-              "sort_options": false
             }
           },
           {
@@ -156,9 +143,9 @@
           },
           {
             "title": "limelight",
-            "x": 1152.0,
-            "y": 0.0,
-            "width": 384.0,
+            "x": 1088.0,
+            "y": 384.0,
+            "width": 448.0,
             "height": 384.0,
             "type": "Camera Stream",
             "properties": {
@@ -168,73 +155,16 @@
             }
           },
           {
-            "title": "climber",
-            "x": 640.0,
-            "y": 0.0,
+            "title": "Auto Chooser",
+            "x": 320.0,
+            "y": 640.0,
             "width": 256.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "ComboBox Chooser",
             "properties": {
-              "topic": "/SmartDashboard/climber",
+              "topic": "/SmartDashboard/Auto Chooser",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "climber-encoder",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/climber-encoder",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "stage2",
-            "x": 896.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/stage2",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "stage2-encoder",
-            "x": 896.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/stage2-encoder",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "wrist",
-            "x": 640.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/wrist",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "sort_options": false
             }
           }
         ]
