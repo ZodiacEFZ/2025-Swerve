@@ -85,16 +85,6 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
     }
 
     /**
-     * Retrieve current mechanism position.
-     *
-     * @return the {@link Position}
-     */
-    @SendableGetter (name = "Current Position")
-    public Position getPosition() {
-        return new Position(this.shoulderLeader.getPosition(), this.elbow.getPosition(), this.wrist.getPosition());
-    }
-
-    /**
      * According to the current velocity of arm, calculate ETA at the current target.
      *
      * @return the estimated time, empty if the arm is not currently moving towards the target
@@ -114,6 +104,16 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
             return Optional.empty();
         }
         return Optional.of(Units.Second.of(eta));
+    }
+
+    /**
+     * Retrieve current mechanism position.
+     *
+     * @return the {@link Position}
+     */
+    @SendableGetter (name = "Current Position")
+    public Position getPosition() {
+        return new Position(this.shoulderLeader.getPosition(), this.elbow.getPosition(), this.wrist.getPosition());
     }
 
     @Override
@@ -192,23 +192,23 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
             return new Pair<>(sol1, sol2);
         }
 
-        public boolean isNear(Position rhs, Angle threshold) {
-            return shoulder.isNear(rhs.shoulder, threshold) && elbow.isNear(rhs.elbow, threshold);
-        }
-
         public boolean isNear(Position rhs) {
             // TODO: this threshold shall be tuned
             return this.isNear(rhs, Units.Degree.of(15));
         }
 
-        public Translation2d elbowPosition() {
-            return new Translation2d(POSTERIOR_ARM_LENGTH.in(Units.Meter), new Rotation2d(this.shoulder)).plus(
-                    installPositionXZ());
+        public boolean isNear(Position rhs, Angle threshold) {
+            return shoulder.isNear(rhs.shoulder, threshold) && elbow.isNear(rhs.elbow, threshold);
         }
 
         public Translation2d wristPosition() {
             return new Translation2d(FOREARM_LENGTH.in(Units.Meter),
                                      new Rotation2d(this.shoulder.plus(this.elbow))).plus(this.elbowPosition());
+        }
+
+        public Translation2d elbowPosition() {
+            return new Translation2d(POSTERIOR_ARM_LENGTH.in(Units.Meter), new Rotation2d(this.shoulder)).plus(
+                    installPositionXZ());
         }
     }
 
