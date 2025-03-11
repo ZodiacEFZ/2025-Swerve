@@ -9,6 +9,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -51,7 +52,8 @@ public class RobotContainer implements Sendable {
     //    private final CommandXboxController operator = new CommandXboxController(1);
     private final Swerve drivetrain;
     private final Intake intake = new Intake();
-    private final PowerDistribution powerDistribution = new PowerDistribution(63, PowerDistribution.ModuleType.kRev);
+    private final PowerDistribution powerDistribution = new PowerDistribution(63,
+                                                                              PowerDistribution.ModuleType.kRev);
     private final ArmStage2 armStage2 = new ArmStage2();
     private final Limelight limelight;
     private final SendableChooser<Command> autoChooser;
@@ -67,30 +69,36 @@ public class RobotContainer implements Sendable {
         // TODO: tune PID arguments for each swerve module
         final var frontLeft = new TalonFXSwerveModule.Config().withAngle(1)
                                                               .withDrive(5)
-                                                              .withEncoder(new CANCoder(9, 0.294678))
+                                                              .withEncoder(
+                                                                      new CANCoder(9, 0.294678))
                                                               .withAngleInverted(true)
                                                               .withDriveInverted(true);
         final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
                                                              .withDrive(6)
-                                                             .withEncoder(new CANCoder(10, -0.251709))
+                                                             .withEncoder(
+                                                                     new CANCoder(10, -0.251709))
                                                              .withAngleInverted(true)
                                                              .withDriveInverted(true);
         final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
                                                                .withDrive(8)
-                                                               .withEncoder(new CANCoder(12, 0.035645))
+                                                               .withEncoder(
+                                                                       new CANCoder(12, 0.035645))
                                                                .withAngleInverted(true)
                                                                .withDriveInverted(true);
         final var rearRight = new TalonFXSwerveModule.Config().withAngle(3)
                                                               .withDrive(7)
-                                                              .withEncoder(new CANCoder(11, 0.566162))
+                                                              .withEncoder(
+                                                                      new CANCoder(11, 0.566162))
                                                               .withAngleInverted(true)
                                                               .withDriveInverted(true);
 
         final var heading = new PIDController(1.75, 0.025, 0.2);
         heading.setIZone(Math.PI / 8);
 
-        var constraints = new PathConstraints(Units.MetersPerSecond.of(5), Units.MetersPerSecondPerSecond.of(1.5),
-                                              Units.DegreesPerSecond.of(360), Units.DegreesPerSecondPerSecond.of(720));
+        var constraints = new PathConstraints(Units.MetersPerSecond.of(3),
+                                              Units.MetersPerSecondPerSecond.of(1.5),
+                                              Units.DegreesPerSecond.of(360),
+                                              Units.DegreesPerSecondPerSecond.of(720));
 
         this.drivetrain = new Swerve.Config().withRobotWidth(Units.Meters.of(0.7))
                                              .withRobotLength(Units.Meters.of(0.7))
@@ -136,34 +144,43 @@ public class RobotContainer implements Sendable {
     }
 
     /**
-     * Use this method to define your button->command mappings. Buttons can be created by instantiating a
-     * {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick} or
-     * {@link XboxController}), and then calling passing it to a {@link JoystickButton}.
+     * Use this method to define your button->command mappings. Buttons can be created by
+     * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses
+     * ({@link edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling passing
+     * it to a {@link JoystickButton}.
      */
     private void configureButtonBindings() {
         // Drivetrain
-        this.driver.a().onTrue(Commands.runOnce(this::toggleAutoHeading));
-        this.driver.x().onTrue(Commands.runOnce(this::toggleSlowMode));
-        this.driver.back().onTrue(Commands.runOnce(this::zeroHeading));
-        this.driver.start().onTrue(Commands.runOnce(this::toggleFieldCentric));
-        this.driver.rightBumper().onChange(Commands.runOnce(this::toggleDirectAngle));
+        this.driver.a().onTrue(Commands.runOnce(this::toggleAutoHeading).ignoringDisable(true));
+        this.driver.x().onTrue(Commands.runOnce(this::toggleSlowMode).ignoringDisable(true));
+        this.driver.back().onTrue(Commands.runOnce(this::zeroHeading).ignoringDisable(true));
+        this.driver.start()
+                   .onTrue(Commands.runOnce(this::toggleFieldCentric).ignoringDisable(true));
+        this.driver.rightBumper()
+                   .onChange(Commands.runOnce(this::toggleDirectAngle).ignoringDisable(true));
         this.driver.povLeft()
-                   .onTrue(Commands.runOnce(
-                           () -> this.drivetrain.setTargetHeading(new Rotation2d(Units.Degrees.of(-54)))));
+                   .onTrue(Commands.runOnce(() -> this.drivetrain.setTargetHeading(
+                           new Rotation2d(Units.Degrees.of(-54)))));
         this.driver.povRight()
-                   .onTrue(Commands.runOnce(
-                           () -> this.drivetrain.setTargetHeading(new Rotation2d(Units.Degrees.of(54)))));
+                   .onTrue(Commands.runOnce(() -> this.drivetrain.setTargetHeading(
+                           new Rotation2d(Units.Degrees.of(54)))));
 
         // Arm
         this.driver.povLeft().onTrue(this.armStage2.getIntakeCommand());
         this.driver.povRight().onTrue(this.armStage2.getIntakeCommand());
         this.driver.povUp().onTrue(this.armStage2.getL4Command());
         this.driver.povDown().onTrue(this.armStage2.getIdleCommand());
-        this.driver.b().onTrue(this.armStage2.getDropCommand()).onFalse(this.armStage2.getRestoreCommand());
+        this.driver.b()
+                   .onTrue(this.armStage2.getDropCommand())
+                   .onFalse(this.armStage2.getRestoreCommand());
 
         // Intake
-        this.driver.leftTrigger().onTrue(this.intake.getOuttakeCommand()).onFalse(this.intake.getStopCommand());
-        this.driver.rightTrigger().onTrue(this.intake.getIntakeCommand()).onFalse(this.intake.getStopCommand());
+        this.driver.leftTrigger()
+                   .onTrue(this.intake.getOuttakeCommand())
+                   .onFalse(this.intake.getStopCommand());
+        this.driver.rightTrigger()
+                   .onTrue(this.intake.getIntakeCommand())
+                   .onFalse(this.intake.getStopCommand());
 
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
@@ -178,8 +195,9 @@ public class RobotContainer implements Sendable {
             var heading = new Rotation2d(-this.driver.getRightY(), -this.driver.getRightX());
             if (this.autoHeading) {
                 var headings = new Rotation2d[]{
-                        new Rotation2d(0), new Rotation2d(Math.PI / 3), new Rotation2d(Math.PI * 2 / 3),
-                        new Rotation2d(Math.PI), new Rotation2d(-Math.PI * 2 / 3), new Rotation2d(-Math.PI / 3)
+                        new Rotation2d(0), new Rotation2d(Math.PI / 3),
+                        new Rotation2d(Math.PI * 2 / 3), new Rotation2d(Math.PI),
+                        new Rotation2d(-Math.PI * 2 / 3), new Rotation2d(-Math.PI / 3)
                 };
                 return Arrays.stream(headings).min((a, b) -> {
                     var a0 = a.minus(heading).getMeasure().abs(Units.Radians);
@@ -188,25 +206,28 @@ public class RobotContainer implements Sendable {
                 }).get();
             }
             return heading;
-        });
+        }, () -> new Translation2d(-this.driver.getRightY(), -this.driver.getRightX()).getNorm());
 
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).rotation(
+        var angularVelocityInput = new Swerve.InputStream(this.drivetrain,
+                                                          translation2dSupplier).rotation(
                 () -> -this.driver.getRightX()).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Swerve.InputStream(this.drivetrain, translation2dSupplier).heading(headingSupplier)
-                                                                                             .deadband(0.05);
+        var directAngleInput = new Swerve.InputStream(this.drivetrain,
+                                                      translation2dSupplier).heading(
+                headingSupplier).deadband(0.05);
 
         /*
           Direct angle input can only be used in field centric mode.
          */
         this.drivetrain.setDefaultCommand(
-                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput, this.drivetrain::getDirectAngle,
+                this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput,
+                                                this.drivetrain::getDirectAngle,
                                                 this.drivetrain::getFieldCentric));
     }
 
@@ -272,6 +293,9 @@ public class RobotContainer implements Sendable {
         SmartDashboard.putData("Field", this.drivetrain.getField());
         SmartDashboard.putData("Arm", this.armStage2);
 
-        PathPlanner.getInstance().createPath(, , , );
+        SmartDashboard.putData(PathPlanner.getInstance()
+                                          .getFindPathCommand(
+                                                  new Pose2d(new Translation2d(3.729, 5.004),
+                                                             new Rotation2d(-Math.PI / 3))));
     }
 }
