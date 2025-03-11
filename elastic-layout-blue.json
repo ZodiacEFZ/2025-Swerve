@@ -70,6 +70,71 @@
                 }
               }
             ]
+          },
+          {
+            "title": "List Layout",
+            "x": 832.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Arm Commands",
+                "x": 896.0,
+                "y": 448.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/SendableChooser[1]",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "Run",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Run",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "Intake",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Intake",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              },
+              {
+                "title": "Idle",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Idle",
+                  "period": 0.06,
+                  "show_type": false
+                }
+              }
+            ]
           }
         ],
         "containers": [
@@ -142,7 +207,7 @@
             }
           },
           {
-            "title": "limelight",
+            "title": "Limelight",
             "x": 1088.0,
             "y": 384.0,
             "width": 448.0,
@@ -165,6 +230,25 @@
               "topic": "/SmartDashboard/Auto Chooser",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "USB Camera 0",
+            "x": 1088.0,
+            "y": 0.0,
+            "width": 448.0,
+            "height": 384.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/USB Camera 0",
+              "period": 0.06,
+              "rotation_turns": 0,
+              "compression": 20,
+              "fps": 15,
+              "resolution": [
+                320.0,
+                240.0
+              ]
             }
           }
         ]
