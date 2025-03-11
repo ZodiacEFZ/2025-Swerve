@@ -57,6 +57,19 @@
                 }
               },
               {
+                "title": "Auto Heading",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "/SmartDashboard/Robot/Auto Heading",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
                 "title": "Reset Heading",
                 "x": 1152.0,
                 "y": 128.0,
