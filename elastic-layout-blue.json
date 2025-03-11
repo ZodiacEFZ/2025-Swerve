@@ -152,24 +152,6 @@
         ],
         "containers": [
           {
-            "title": "Voltage",
-            "x": 320.0,
-            "y": 192.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Voltage View",
-            "properties": {
-              "topic": "/SmartDashboard/Voltage",
-              "period": 0.06,
-              "data_type": "double",
-              "min_value": 4.0,
-              "max_value": 13.0,
-              "divisions": 5,
-              "inverted": false,
-              "orientation": "horizontal"
-            }
-          },
-          {
             "title": "Match Time",
             "x": 320.0,
             "y": 0.0,
@@ -262,6 +244,24 @@
                 320.0,
                 240.0
               ]
+            }
+          },
+          {
+            "title": "Voltage",
+            "x": 320.0,
+            "y": 192.0,
+            "width": 320.0,
+            "height": 192.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Voltage",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 8.0,
+              "max_value": 13.0,
+              "divisions": 5,
+              "inverted": false,
+              "orientation": "horizontal"
             }
           }
         ]
