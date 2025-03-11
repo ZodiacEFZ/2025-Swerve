@@ -22,18 +22,19 @@ public class Arm1 extends SubsystemBase {
     private static final Distance FOREARM_LENGTH = Units.Meters.of(0.77);
     private static final Distance INTAKE_LENGTH = Units.Meters.of(0.25);
     /**
-     * The position of the arm installed on the robot. The x component is the distance from the front of the robot to
-     * the axis of the first stage of the arm, viewing from the left side of the robot. The y component is the height of
-     * the first stage of the arm.
+     * The position of the arm installed on the robot. The x component is the distance from the
+     * front of the robot to the axis of the first stage of the arm, viewing from the left side of
+     * the robot. The y component is the height of the first stage of the arm.
      */
     private static final Translation2d ARM_POSITION = new Translation2d(0.2, 0.24);
     /**
-     * The position limit of the arm's components. The x component is the distance from the front of the robot to the
-     * axis of the first stage of the arm, viewing from the left side of the robot. The y component is the height of the
-     * first stage of the arm.
+     * The position limit of the arm's components. The x component is the distance from the front of
+     * the robot to the axis of the first stage of the arm, viewing from the left side of the robot.
+     * The y component is the height of the first stage of the arm.
      */
     // There is no top limit for the arm so the y component is set to 10 meters.
-    private static final Rectangle POSITION_LIMIT = new Rectangle(new Translation2d(-0.3, 0), new Translation2d(1, 10));
+    private static final Rectangle POSITION_LIMIT = new Rectangle(new Translation2d(-0.3, 0),
+                                                                  new Translation2d(1, 10));
 
     private final TalonSRXMotor shoulderLeader = new TalonSRXMotor(21);
     private final TalonSRXMotor shoulderFollower = new TalonSRXMotor(22);
@@ -59,7 +60,8 @@ public class Arm1 extends SubsystemBase {
         this.wrist.applyConfiguration(config);
         this.wrist.setSensorToMechanismRatio(100); // 30 * 60 / 18
 
-        this.targetPose = new Pose(this.getStage1Angle(), this.getStage2Angle(), this.getIntakeRotation());
+        this.targetPose = new Pose(this.getStage1Angle(), this.getStage2Angle(),
+                                   this.getIntakeRotation());
     }
 
     private Angle getStage1Angle() {
@@ -75,15 +77,17 @@ public class Arm1 extends SubsystemBase {
     }
 
     /**
-     * Calculates the angles of the stages of the arm with the given position. The first element of the pair is the
-     * angle of the first stage. The second element of the pair is the angle of the second stage.
+     * Calculates the angles of the stages of the arm with the given position. The first element of
+     * the pair is the angle of the first stage. The second element of the pair is the angle of the
+     * second stage.
      *
      * @param position  The position of the end of the arm.
      * @param rightHand Whether the arm is in the right hand system.
      *
      * @return A Pair<Angle, Angle>, representing the angles of the stages of the arm.
      */
-    private static Pair<Angle, Angle> calculateStageAngles(Translation2d position, boolean rightHand) {
+    private static Pair<Angle, Angle> calculateStageAngles(Translation2d position,
+                                                           boolean rightHand) {
         var endPosition = position.minus(ARM_POSITION);
         double l0 = endPosition.getNorm();
         double l1 = POSTERIOR_ARM_LENGTH.in(Units.Meters);
@@ -91,9 +95,10 @@ public class Arm1 extends SubsystemBase {
 
         double cosTheta2 = (l0 * l0 - l1 * l1 - l2 * l2) / (2 * l1 * l2);
         double sinTheta2 = Math.sqrt(1 - cosTheta2 * cosTheta2);
-        double theta2 = rightHand ? Math.atan2(sinTheta2, cosTheta2) : Math.atan2(-sinTheta2, cosTheta2);
-        double theta1 =
-                Math.atan2(endPosition.getY(), endPosition.getX()) - Math.atan2(l2 * sinTheta2, l1 + l2 * cosTheta2);
+        double theta2 =
+                rightHand ? Math.atan2(sinTheta2, cosTheta2) : Math.atan2(-sinTheta2, cosTheta2);
+        double theta1 = Math.atan2(endPosition.getY(), endPosition.getX()) -
+                        Math.atan2(l2 * sinTheta2, l1 + l2 * cosTheta2);
         return new Pair<>(Units.Radians.of(theta1), Units.Radians.of(theta1 + theta2));
     }
 
@@ -147,14 +152,12 @@ public class Arm1 extends SubsystemBase {
                     this.elbow.MotionMagic(current.plus(closestDelta));
                     break;
                 case CLOCKWISE:
-                    this.elbow.MotionMagic(
-                            closestDelta.in(Units.Radians) > 0 ? closestDelta.minus(Units.Radians.of(Math.PI * 2)) :
-                                    closestDelta);
+                    this.elbow.MotionMagic(closestDelta.in(Units.Radians) > 0 ? closestDelta.minus(
+                            Units.Radians.of(Math.PI * 2)) : closestDelta);
                     break;
                 case COUNTERCLOCKWISE:
-                    this.elbow.MotionMagic(
-                            closestDelta.in(Units.Radians) < 0 ? closestDelta.plus(Units.Radians.of(Math.PI * 2)) :
-                                    closestDelta);
+                    this.elbow.MotionMagic(closestDelta.in(Units.Radians) < 0 ? closestDelta.plus(
+                            Units.Radians.of(Math.PI * 2)) : closestDelta);
                     break;
             }
         }
@@ -167,13 +170,16 @@ public class Arm1 extends SubsystemBase {
 
     private Translation2d getStage2Position() {
         return this.getStage1Position()
-                   .plus(new Translation2d(FOREARM_LENGTH.times(Math.cos(this.getStage2Angle().in(Units.Radians))),
-                                           FOREARM_LENGTH.times(Math.sin(this.getStage2Angle().in(Units.Radians)))));
+                   .plus(new Translation2d(
+                           FOREARM_LENGTH.times(Math.cos(this.getStage2Angle().in(Units.Radians))),
+                           FOREARM_LENGTH.times(
+                                   Math.sin(this.getStage2Angle().in(Units.Radians)))));
     }
 
     private Translation2d getStage1Position() {
-        return new Translation2d(POSTERIOR_ARM_LENGTH.times(Math.cos(this.getStage1Angle().in(Units.Radians))),
-                                 POSTERIOR_ARM_LENGTH.times(Math.sin(this.getStage1Angle().in(Units.Radians))));
+        return new Translation2d(
+                POSTERIOR_ARM_LENGTH.times(Math.cos(this.getStage1Angle().in(Units.Radians))),
+                POSTERIOR_ARM_LENGTH.times(Math.sin(this.getStage1Angle().in(Units.Radians))));
     }
 
     enum Position {

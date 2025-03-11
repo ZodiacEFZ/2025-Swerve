@@ -22,7 +22,8 @@ public class Climber extends SubsystemBase {
         this.motor.setBrakeWhenNeutral(true);
         this.motor.setSensorToMechanismRatio(58.0 / 18 * 100);
         var angle = Maths.limitAngle(this.encoder.get());
-        this.motor.setRelativeEncoderPosition(Maths.limitAngle(angle, Units.Radians.of(-Math.PI / 4)));
+        this.motor.setRelativeEncoderPosition(
+                Maths.limitAngle(angle, Units.Radians.of(-Math.PI / 4)));
         this.motor.setSoftwareLimitSwitch(Position.DOWN.position, Position.CLIMB.position);
     }
 

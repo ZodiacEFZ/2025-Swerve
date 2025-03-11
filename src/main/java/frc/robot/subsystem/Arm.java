@@ -45,7 +45,8 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
      * plane</a> with respect to robot center.
      */
     // There is no top limit for the arm so the y component is set to 10 meters.
-    private final Rectangle positionLimit = new Rectangle(new Translation2d(-0.3, 0), new Translation2d(1, 10));
+    private final Rectangle positionLimit = new Rectangle(new Translation2d(-0.3, 0),
+                                                          new Translation2d(1, 10));
 
     /**
      * The current desired position of the arm.
@@ -65,8 +66,8 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
         // TODO: tune these arguments
         this.shoulderLeader.setMotionMagicConfig(0, 0, 0, 0, Units.RadiansPerSecond.of(0),
                                                  Units.RadiansPerSecondPerSecond.of(0), 0);
-        this.elbow.setMotionMagicConfig(0, 0, 0, 0, Units.RadiansPerSecond.of(0), Units.RadiansPerSecondPerSecond.of(0),
-                                        0);
+        this.elbow.setMotionMagicConfig(0, 0, 0, 0, Units.RadiansPerSecond.of(0),
+                                        Units.RadiansPerSecondPerSecond.of(0), 0);
 
         this.wrist.setPID(0.1, 0, 0);
         var config = new SparkMaxConfig();
@@ -113,7 +114,8 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
      */
     @SendableGetter (name = "Current Position")
     public Position getPosition() {
-        return new Position(this.shoulderLeader.getPosition(), this.elbow.getPosition(), this.wrist.getPosition());
+        return new Position(this.shoulderLeader.getPosition(), this.elbow.getPosition(),
+                            this.wrist.getPosition());
     }
 
     @Override
@@ -151,12 +153,14 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
      * @param elbow    the angle between forearm and posterior arm
      * @param wrist    the angle of wrist rotation
      */
-    public record Position(@SendableProperty (access = SendableProperty.AccessType.Out) Angle shoulder,
-                           @SendableProperty (access = SendableProperty.AccessType.Out) Angle elbow,
-                           @SendableProperty (access = SendableProperty.AccessType.Out) Angle wrist)
+    public record Position(
+            @SendableProperty (access = SendableProperty.AccessType.Out) Angle shoulder,
+            @SendableProperty (access = SendableProperty.AccessType.Out) Angle elbow,
+            @SendableProperty (access = SendableProperty.AccessType.Out) Angle wrist)
             implements SimpleSendable {
         // TODO: Fill in these values
-        public static final Position IDLE = new Position(Units.Radian.of(0), Units.Radian.of(0), Units.Radian.of(0));
+        public static final Position IDLE = new Position(Units.Radian.of(0), Units.Radian.of(0),
+                                                         Units.Radian.of(0));
         public static final Position INTAKE = IDLE;
         public static final Position CLIMB = IDLE;
         public static final Position L1 = IDLE;
@@ -169,7 +173,8 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
          *
          * @param displacement desired displacement with respect to the base of arm in meters
          *
-         * @return both two solutions, the first one is always with smaller angle between posterior arm and robot front
+         * @return both two solutions, the first one is always with smaller angle between posterior
+         * arm and robot front
          */
         public static Pair<Position, Position> resolve(Translation2d displacement) {
             final var l0 = displacement.getNorm();
@@ -186,8 +191,10 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
             final var elbow1 = Math.PI - t2;
             final var elbow2 = -elbow1;
 
-            final var sol1 = new Position(Units.Radian.of(shoulder1), Units.Radian.of(elbow1), Units.Radian.of(0));
-            final var sol2 = new Position(Units.Radian.of(shoulder2), Units.Radian.of(elbow2), Units.Radian.of(0));
+            final var sol1 = new Position(Units.Radian.of(shoulder1), Units.Radian.of(elbow1),
+                                          Units.Radian.of(0));
+            final var sol2 = new Position(Units.Radian.of(shoulder2), Units.Radian.of(elbow2),
+                                          Units.Radian.of(0));
 
             return new Pair<>(sol1, sol2);
         }
@@ -203,12 +210,13 @@ public final class Arm extends SubsystemBase implements SimpleSendable {
 
         public Translation2d wristPosition() {
             return new Translation2d(FOREARM_LENGTH.in(Units.Meter),
-                                     new Rotation2d(this.shoulder.plus(this.elbow))).plus(this.elbowPosition());
+                                     new Rotation2d(this.shoulder.plus(this.elbow))).plus(
+                    this.elbowPosition());
         }
 
         public Translation2d elbowPosition() {
-            return new Translation2d(POSTERIOR_ARM_LENGTH.in(Units.Meter), new Rotation2d(this.shoulder)).plus(
-                    installPositionXZ());
+            return new Translation2d(POSTERIOR_ARM_LENGTH.in(Units.Meter),
+                                     new Rotation2d(this.shoulder)).plus(installPositionXZ());
         }
     }
 

@@ -18,9 +18,9 @@ import frc.libzodiac.ui.Elastic;
 import frc.libzodiac.util.GameUtil;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in the TimedRobot
- * documentation. If you change the name of this class or the package after creating this project, you must also update
- * the Main.java file in the project.
+ * The methods in this class are called automatically corresponding to each mode, as described in
+ * the TimedRobot documentation. If you change the name of this class or the package after creating
+ * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
     private final RobotContainer bot;
@@ -28,7 +28,8 @@ public class Robot extends TimedRobot {
     private Command autonomousCommand;
 
     /**
-     * This function is run when the robot is first started up and should be used for any initialization code.
+     * This function is run when the robot is first started up and should be used for any
+     * initialization code.
      */
     public Robot() {
         this.bot = new RobotContainer();
@@ -105,8 +106,8 @@ public class Robot extends TimedRobot {
     }
 
     /**
-     * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics that you want ran
-     * during disabled, autonomous, teleoperated and test.
+     * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+     * that you want ran during disabled, autonomous, teleoperated and test.
      *
      * <p>This runs after the mode specific periodic functions, but before LiveWindow and
      * SmartDashboard integrated updating.
@@ -129,7 +130,8 @@ public class Robot extends TimedRobot {
             this.disabledTimer.stop();
         }
 
-        var pattern = LEDPattern.solid(GameUtil.isRedAlliance() ? Color.kFirstRed : Color.kFirstBlue)
+        var pattern = LEDPattern.solid(
+                                        GameUtil.isRedAlliance() ? Color.kFirstRed : Color.kFirstBlue)
                                 .breathe(Units.Seconds.of(4));
         LEDController.getInstance().applyAll(pattern);
     }
