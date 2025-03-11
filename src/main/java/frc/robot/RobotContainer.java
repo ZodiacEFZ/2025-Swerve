@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -47,9 +48,10 @@ import java.util.stream.IntStream;
 public class RobotContainer implements Sendable {
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
+    //    private final CommandXboxController operator = new CommandXboxController(1);
     private final Swerve drivetrain;
     private final Intake intake = new Intake();
-    private final PowerDistribution powerDistribution = new PowerDistribution();
+    private final PowerDistribution powerDistribution = new PowerDistribution(63, PowerDistribution.ModuleType.kRev);
     private final ArmStage2 armStage2 = new ArmStage2();
     private final Limelight limelight;
     private final SendableChooser<Command> autoChooser;
@@ -87,10 +89,12 @@ public class RobotContainer implements Sendable {
         final var heading = new PIDController(1.75, 0.025, 0.2);
         heading.setIZone(Math.PI / 8);
 
+        var constraints = new PathConstraints(Units.MetersPerSecond.of(5), Units.MetersPerSecondPerSecond.of(1.5),
+                                              Units.DegreesPerSecond.of(360), Units.DegreesPerSecondPerSecond.of(720));
+
         this.drivetrain = new Swerve.Config().withRobotWidth(Units.Meters.of(0.7))
                                              .withRobotLength(Units.Meters.of(0.7))
-                                             .withMaxSpeed(Units.MetersPerSecond.of(5))
-                                             .withMaxAngularVelocity(Units.RadiansPerSecond.of(Math.PI))
+                                             .withConstraints(constraints)
                                              .withFrontLeft(frontLeft)
                                              .withFrontRight(frontRight)
                                              .withRearLeft(rearLeft)
@@ -106,7 +110,8 @@ public class RobotContainer implements Sendable {
                                              .withInitialPose(new Pose2d())
                                              .build();
 
-        PathPlanner.initInstance(this.drivetrain);
+        // TODO: add path constraints
+        PathPlanner.initInstance(this.drivetrain, constraints);
 
         // Configure the button bindings
         this.configureButtonBindings();
@@ -149,6 +154,13 @@ public class RobotContainer implements Sendable {
                    .onTrue(Commands.runOnce(
                            () -> this.drivetrain.setTargetHeading(new Rotation2d(Units.Degrees.of(54)))));
 
+        // Arm
+        this.driver.povLeft().onTrue(this.armStage2.getIntakeCommand());
+        this.driver.povRight().onTrue(this.armStage2.getIntakeCommand());
+        this.driver.povUp().onTrue(this.armStage2.getL4Command());
+        this.driver.povDown().onTrue(this.armStage2.getIdleCommand());
+        this.driver.b().onTrue(this.armStage2.getDropCommand()).onFalse(this.armStage2.getRestoreCommand());
+
         // Intake
         this.driver.leftTrigger().onTrue(this.intake.getOuttakeCommand()).onFalse(this.intake.getStopCommand());
         this.driver.rightTrigger().onTrue(this.intake.getIntakeCommand()).onFalse(this.intake.getStopCommand());
@@ -156,11 +168,6 @@ public class RobotContainer implements Sendable {
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
         this.driver.leftBumper().onTrue(this.climber.getClimbCommand());
-//                   .onTrue(this.arm.follow(Constants.TRAJ_IDLE_TO_CLIMB));
-
-        this.driver.povUp();
-        this.driver.povDown();
-        this.driver.b();
     }
 
     private void setDriveCommand() {
@@ -259,9 +266,12 @@ public class RobotContainer implements Sendable {
         builder.addBooleanProperty("Auto Heading", () -> this.autoHeading,
                                    (autoHeading) -> this.autoHeading = autoHeading);
 
-        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putNumber("Voltage", this.powerDistribution.getVoltage());
+        builder.addDoubleProperty("Match Time", DriverStation::getMatchTime, null);
+        builder.addDoubleProperty("Voltage", this.powerDistribution::getVoltage, null);
         SmartDashboard.putData("Drivetrain", this.drivetrain);
         SmartDashboard.putData("Field", this.drivetrain.getField());
+        SmartDashboard.putData("Arm", this.armStage2);
+
+        PathPlanner.getInstance().createPath(, , , );
     }
 }

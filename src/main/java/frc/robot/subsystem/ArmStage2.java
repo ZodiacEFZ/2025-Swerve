@@ -6,6 +6,9 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.libzodiac.hardware.MagEncoder;
@@ -28,6 +31,7 @@ public class ArmStage2 extends SubsystemBase {
     private final MagEncoder encoder = new MagEncoder(27, -2950);
     private final TalonFXMotor motor = new TalonFXMotor(28);
     private final SparkMaxMotor wrist = new SparkMaxMotor(24);
+    private Angle position = null;
 
     public ArmStage2() {
         this.encoder.setInverted(true);
@@ -84,28 +88,103 @@ public class ArmStage2 extends SubsystemBase {
         this.wrist.MAXMotionPosition(position);
     }
 
-    public void L1() {
-        this.moveTo(L1_POSITION);
-        this.rotate(ROTATION_HORIZONTAL);
+    public Command getRestoreCommand() {
+        return runOnce(this::restore);
     }
 
-    public void L2() {
-        this.moveTo(L2_POSITION);
-        this.rotate(ROTATION_HORIZONTAL);
+    public void restore() {
+        if (this.position == null) {
+            return;
+        }
+        this.moveTo(this.position);
     }
 
-    public void L3() {
-        this.moveTo(L3_POSITION);
-        this.rotate(ROTATION_HORIZONTAL);
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        var chooser = new SendableChooser<Runnable>();
+        chooser.setDefaultOption("L4", this::L4);
+        chooser.addOption("L3", this::L3);
+        chooser.addOption("L2", this::L2);
+        chooser.addOption("L1", this::L1);
+        SmartDashboard.putData(chooser);
+        SmartDashboard.putData(runOnce(() -> chooser.getSelected().run()).withName("Run"));
+        SmartDashboard.putData("Intake", this.getIntakeCommand());
+        SmartDashboard.putData("Drop", this.getDropCommand());
+        SmartDashboard.putData("Idle", this.getIdleCommand());
     }
 
     public void L4() {
         this.moveTo(L4_POSITION);
         this.rotate(ROTATION_HORIZONTAL);
+        this.position = L4_POSITION;
+    }
+
+    public void L3() {
+        this.moveTo(L3_POSITION);
+        this.rotate(ROTATION_HORIZONTAL);
+        this.position = L3_POSITION;
+    }
+
+    public void L2() {
+        this.moveTo(L2_POSITION);
+        this.rotate(ROTATION_HORIZONTAL);
+        this.position = L2_POSITION;
+    }
+
+    public void L1() {
+        this.moveTo(L1_POSITION);
+        this.rotate(ROTATION_HORIZONTAL);
+        this.position = L1_POSITION;
+    }
+
+    public Command getIntakeCommand() {
+        return runOnce(this::intake);
+    }
+
+    public Command getDropCommand() {
+        return runOnce(this::drop);
+    }
+
+    public Command getIdleCommand() {
+        return runOnce(this::idle);
     }
 
     public void intake() {
         this.moveTo(INTAKE_POSITION);
         this.rotate(ROTATION_VERTICAL);
+        this.position = INTAKE_POSITION;
+    }
+
+    public void drop() {
+        if (this.position == null || this.position.equals(INTAKE_POSITION)) {
+            return;
+        }
+        if (this.position.equals(L4_POSITION)) {
+            this.moveTo(L4_POSITION.plus(Units.Degrees.of(10)));
+        } else {
+            this.moveTo(this.position.minus(Units.Degrees.of(10)));
+        }
+    }
+
+    public void idle() {
+        this.moveTo(REVERSE_POSITION_LIMIT);
+        this.rotate(ROTATION_VERTICAL);
+        this.position = null;
+    }
+
+    public Command getL4Command() {
+        return runOnce(this::L4);
+    }
+
+    public Command getL3Command() {
+        return runOnce(this::L3);
+    }
+
+    public Command getL2Command() {
+        return runOnce(this::L2);
+    }
+
+    public Command getL1Command() {
+        return runOnce(this::L1);
     }
 }
