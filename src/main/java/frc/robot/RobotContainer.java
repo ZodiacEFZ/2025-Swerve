@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.controller.PIDController;
@@ -22,8 +25,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.libzodiac.api.SwerveDrivetrain;
+import frc.libzodiac.drivetrain.CTRESwerve;
 import frc.libzodiac.drivetrain.PathPlanner;
-import frc.libzodiac.drivetrain.Swerve;
+import frc.libzodiac.drivetrain.TalonFXSwerve;
 import frc.libzodiac.hardware.CANCoder;
 import frc.libzodiac.hardware.Limelight;
 import frc.libzodiac.hardware.Pigeon;
@@ -32,6 +37,7 @@ import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
 import frc.libzodiac.util.Translation2dSupplier;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystem.ArmStage2;
 import frc.robot.subsystem.Climber;
 import frc.robot.subsystem.Intake;
@@ -50,7 +56,7 @@ public class RobotContainer implements Sendable {
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
     //    private final CommandXboxController operator = new CommandXboxController(1);
-    private final Swerve drivetrain;
+    private final SwerveDrivetrain drivetrain;
     private final Intake intake = new Intake();
     private final PowerDistribution powerDistribution = new PowerDistribution(63,
                                                                               PowerDistribution.ModuleType.kRev);
@@ -66,57 +72,77 @@ public class RobotContainer implements Sendable {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        // TODO: tune PID arguments for each swerve module
-        final var frontLeft = new TalonFXSwerveModule.Config().withAngle(1)
-                                                              .withDrive(5)
-                                                              .withEncoder(
-                                                                      new CANCoder(9, 0.294678))
-                                                              .withAngleInverted(true)
-                                                              .withDriveInverted(true);
-        final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
-                                                             .withDrive(6)
-                                                             .withEncoder(
-                                                                     new CANCoder(10, -0.251709))
-                                                             .withAngleInverted(true)
-                                                             .withDriveInverted(true);
-        final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
-                                                               .withDrive(8)
-                                                               .withEncoder(
-                                                                       new CANCoder(12, 0.035645))
-                                                               .withAngleInverted(true)
-                                                               .withDriveInverted(true);
-        final var rearRight = new TalonFXSwerveModule.Config().withAngle(3)
-                                                              .withDrive(7)
-                                                              .withEncoder(
-                                                                      new CANCoder(11, 0.566162))
-                                                              .withAngleInverted(true)
-                                                              .withDriveInverted(true);
-
         final var heading = new PIDController(1.75, 0.025, 0.2);
         heading.setIZone(Math.PI / 8);
 
-        var constraints = new PathConstraints(Units.MetersPerSecond.of(3),
-                                              Units.MetersPerSecondPerSecond.of(1.5),
-                                              Units.DegreesPerSecond.of(360),
-                                              Units.DegreesPerSecondPerSecond.of(720));
+        var constraints = new PathConstraints(TunerConstants.kSpeedAt12Volts,
+                                              Units.MetersPerSecondPerSecond.of(0.25),
+                                              Units.DegreesPerSecond.of(180),
+                                              Units.DegreesPerSecondPerSecond.of(180));
 
-        this.drivetrain = new Swerve.Config().withRobotWidth(Units.Meters.of(0.7))
-                                             .withRobotLength(Units.Meters.of(0.7))
-                                             .withConstraints(constraints)
-                                             .withFrontLeft(frontLeft)
-                                             .withFrontRight(frontRight)
-                                             .withRearLeft(rearLeft)
-                                             .withRearRight(rearRight)
-                                             .withDrivePID(new PIDController(0.2, 7.5, 0.0005))
-                                             .withAnglePID(new PIDController(10, 10, 0.01))
-                                             .withGyro(new Pigeon(13))
-                                             .withHeadingPID(heading)
-                                             .withDriveGearRatio(6.75)
-                                             .withAngleGearRatio(150.0 / 7.0)
-                                             .withWheelRadius(Units.Millimeter.of(50))
-                                             // Initial pose can be blank because we use PathPlanner to set the initial pose
-                                             .withInitialPose(new Pose2d())
-                                             .build();
+        if (true) {
+            this.drivetrain = new CTRESwerve(constraints, heading,
+                                             TunerConstants.DrivetrainConstants,
+                                             TunerConstants.FrontLeft, TunerConstants.FrontRight,
+                                             TunerConstants.BackLeft, TunerConstants.BackRight);
+        } else {
+            // TODO: tune PID arguments for each swerve module
+            final var frontLeft = new TalonFXSwerveModule.Config().withAngle(1)
+                                                                  .withDrive(5)
+                                                                  .withEncoder(
+                                                                          new CANCoder(9, 0.294678))
+                                                                  .withAngleInverted(true)
+                                                                  .withDriveInverted(true);
+            final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
+                                                                 .withDrive(6)
+                                                                 .withEncoder(new CANCoder(10,
+                                                                                           -0.251709))
+                                                                 .withAngleInverted(true)
+                                                                 .withDriveInverted(true);
+            final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
+                                                                   .withDrive(8)
+                                                                   .withEncoder(new CANCoder(12,
+                                                                                             0.035645))
+                                                                   .withAngleInverted(true)
+                                                                   .withDriveInverted(true);
+            final var rearRight = new TalonFXSwerveModule.Config().withAngle(3)
+                                                                  .withDrive(7)
+                                                                  .withEncoder(new CANCoder(11,
+                                                                                            0.566162))
+                                                                  .withAngleInverted(true)
+                                                                  .withDriveInverted(true);
+
+            this.drivetrain = new TalonFXSwerve.Config().withRobotWidth(Units.Meters.of(0.7))
+                                                        .withRobotLength(Units.Meters.of(0.7))
+                                                        .withConstraints(constraints)
+                                                        .withFrontLeft(frontLeft)
+                                                        .withFrontRight(frontRight)
+                                                        .withRearLeft(rearLeft)
+                                                        .withRearRight(rearRight)
+                                                        .withDriveConfig(
+                                                                new Slot0Configs().withKP(0.1)
+                                                                                  .withKI(0)
+                                                                                  .withKD(0)
+                                                                                  .withKS(0)
+                                                                                  .withKV(0.124))
+                                                        .withAngleConfig(
+                                                                new Slot0Configs().withKP(100)
+                                                                                  .withKI(0)
+                                                                                  .withKD(1)
+                                                                                  .withKS(0.1)
+                                                                                  .withKV(2.66)
+                                                                                  .withKA(0)
+                                                                                  .withStaticFeedforwardSign(
+                                                                                          StaticFeedforwardSignValue.UseClosedLoopSign))
+                                                        .withGyro(new Pigeon(13))
+                                                        .withHeadingPID(heading)
+                                                        .withDriveGearRatio(6.75)
+                                                        .withAngleGearRatio(150.0 / 7.0)
+                                                        .withWheelRadius(Units.Millimeter.of(50))
+                                                        // Initial pose can be blank because we use PathPlanner to set the initial pose
+                                                        .withInitialPose(new Pose2d())
+                                                        .build();
+        }
 
         // TODO: add path constraints
         PathPlanner.initInstance(this.drivetrain, constraints);
@@ -139,7 +165,10 @@ public class RobotContainer implements Sendable {
         //noinspection resource
         CameraServer.startAutomaticCapture();
 
-        Collection<TalonFXMotor> motors = this.drivetrain.getTalonFXMotors();
+        Collection<TalonFX> motors = this.drivetrain.getTalonFXMotors();
+        motors.addAll(this.armStage2.getTalonFXMotors());
+        motors.addAll(this.intake.getTalonFXMotors());
+        motors.addAll(this.climber.getTalonFXMotors());
         this.musicPlayer.addInstrument(motors);
     }
 
@@ -211,15 +240,15 @@ public class RobotContainer implements Sendable {
         /*
           Converts driver input into a ChassisSpeeds that is controlled by angular velocity.
          */
-        var angularVelocityInput = new Swerve.InputStream(this.drivetrain,
-                                                          translation2dSupplier).rotation(
+        var angularVelocityInput = new SwerveDrivetrain.InputStream(this.drivetrain,
+                                                                    translation2dSupplier).rotation(
                 () -> -this.driver.getRightX()).deadband(0.05);
 
         /*
           Clone's the angular velocity input stream and converts it to a direct angle input stream.
          */
-        var directAngleInput = new Swerve.InputStream(this.drivetrain,
-                                                      translation2dSupplier).heading(
+        var directAngleInput = new SwerveDrivetrain.InputStream(this.drivetrain,
+                                                                translation2dSupplier).heading(
                 headingSupplier).deadband(0.05);
 
         /*
