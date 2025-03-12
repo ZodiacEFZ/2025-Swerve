@@ -1,5 +1,6 @@
 package frc.robot.subsystem;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -8,6 +9,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.libzodiac.hardware.MagEncoder;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.util.Maths;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 public class Climber extends SubsystemBase {
     private final MagEncoder encoder = new MagEncoder(30, -1675);
@@ -68,6 +72,12 @@ public class Climber extends SubsystemBase {
         } else {
             this.up();
         }
+    }
+
+    public Collection<TalonFX> getTalonFXMotors() {
+        Collection<TalonFX> motors = new HashSet<>();
+        motors.add(this.motor.getMotor());
+        return motors;
     }
 
     private enum Position {

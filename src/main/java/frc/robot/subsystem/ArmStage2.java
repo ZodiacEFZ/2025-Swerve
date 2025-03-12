@@ -2,6 +2,7 @@ package frc.robot.subsystem;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.Units;
@@ -15,6 +16,9 @@ import frc.libzodiac.hardware.MagEncoder;
 import frc.libzodiac.hardware.SparkMaxMotor;
 import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.util.Maths;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 public class ArmStage2 extends SubsystemBase {
     private static final Angle POSITION_LIMIT = Units.Degrees.of(-80);
@@ -186,5 +190,11 @@ public class ArmStage2 extends SubsystemBase {
 
     public Command getL1Command() {
         return runOnce(this::L1);
+    }
+
+    public Collection<TalonFX> getTalonFXMotors() {
+        Collection<TalonFX> motors = new HashSet<>();
+        motors.add(this.motor.getMotor());
+        return motors;
     }
 }
