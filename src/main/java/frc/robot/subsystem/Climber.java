@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class Climber extends SubsystemBase {
-    private final MagEncoder encoder = new MagEncoder(30, -1675);
+    private final MagEncoder encoder = new MagEncoder(30, -2910);
     private final TalonFXMotor motor = new TalonFXMotor(31);
     private Position position = Position.DOWN;
 
