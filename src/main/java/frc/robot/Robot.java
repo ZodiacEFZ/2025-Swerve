@@ -34,9 +34,9 @@ public class Robot extends TimedRobot {
     public Robot() {
         this.bot = new RobotContainer();
         this.disabledTimer = new Timer();
-        LEDController.initInstance(0, 120);
+        LEDController.initInstance(0, 180);
         LEDController.getInstance().add("LED0", 0, 119);
-//        LEDController.getInstance().add("LED1", 120, 179);
+        LEDController.getInstance().add("LED1", 120, 179);
     }
 
     @Override
@@ -124,8 +124,8 @@ public class Robot extends TimedRobot {
         }
 
         var pattern = LEDPattern.solid(
-                                        GameUtil.isRedAlliance() ? Color.kFirstRed : Color.kFirstBlue)
-                                .breathe(Units.Seconds.of(4));
+                                        GameUtil.isRedAlliance() ? Color.kRed : Color.kBlue)
+                                .breathe(Units.Seconds.of(2));
         LEDController.getInstance().applyAll(pattern);
     }
 
