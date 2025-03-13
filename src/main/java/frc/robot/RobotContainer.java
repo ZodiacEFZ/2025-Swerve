@@ -9,6 +9,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,6 +45,7 @@ import frc.robot.subsystem.Intake;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.stream.IntStream;
 
 /*
@@ -166,9 +168,9 @@ public class RobotContainer implements Sendable {
         CameraServer.startAutomaticCapture();
 
         Collection<TalonFX> motors = this.drivetrain.getTalonFXMotors();
-        motors.addAll(this.armStage2.getTalonFXMotors());
-        motors.addAll(this.intake.getTalonFXMotors());
-        motors.addAll(this.climber.getTalonFXMotors());
+//        motors.addAll(this.armStage2.getTalonFXMotors());
+//        motors.addAll(this.intake.getTalonFXMotors());
+//        motors.addAll(this.climber.getTalonFXMotors());
         this.musicPlayer.addInstrument(motors);
     }
 
@@ -322,9 +324,38 @@ public class RobotContainer implements Sendable {
         SmartDashboard.putData("Field", this.drivetrain.getField());
         SmartDashboard.putData("Arm", this.armStage2);
 
-        SmartDashboard.putData(PathPlanner.getInstance()
-                                          .getFindPathCommand(
-                                                  new Pose2d(new Translation2d(3.729, 5.004),
-                                                             new Rotation2d(-Math.PI / 3))));
+        var positions = new HashMap<String, Pose2d>();
+        positions.put("Front - Left",
+                      new Pose2d(new Translation2d(5.72, 4.19), new Rotation2d(Math.PI)));
+        positions.put("Front - Right",
+                      new Pose2d(new Translation2d(5.72, 3.86), new Rotation2d(Math.PI)));
+        positions.put("Front Left - Left",
+                      new Pose2d(new Translation2d(5.24, 5), new Rotation2d(-Math.PI * 2 / 3)));
+        positions.put("Front Left - Right",
+                      new Pose2d(new Translation2d(4.96, 5.17), new Rotation2d(-Math.PI * 2 / 3)));
+        positions.put("Rear Left - Left",
+                      new Pose2d(new Translation2d(4.01, 5.17), new Rotation2d(-Math.PI / 3)));
+        positions.put("Rear Left - Right",
+                      new Pose2d(new Translation2d(3.73, 5), new Rotation2d(-Math.PI / 3)));
+        positions.put("Rear - Left", new Pose2d(new Translation2d(3.25, 4.19), new Rotation2d(0)));
+        positions.put("Rear - Right", new Pose2d(new Translation2d(3.25, 3.86), new Rotation2d(0)));
+        positions.put("Rear Right - Left",
+                      new Pose2d(new Translation2d(3.73, 3.04), new Rotation2d(Math.PI / 3)));
+        positions.put("Rear Right - Right",
+                      new Pose2d(new Translation2d(4.01, 2.87), new Rotation2d(Math.PI / 3)));
+        positions.put("Front Right - Left",
+                      new Pose2d(new Translation2d(4.96, 2.87), new Rotation2d(Math.PI * 2 / 3)));
+        positions.put("Front Right - Right",
+                      new Pose2d(new Translation2d(5.24, 3.04), new Rotation2d(Math.PI * 2 / 3)));
+        positions.forEach((name, pose) -> SmartDashboard.putData(
+                PathPlanner.getInstance().getFindPathCommand(pose).until(() -> {
+                    final var deadband = 0.02;
+                    return MathUtil.applyDeadband(this.driver.getLeftX(), deadband) != 0 ||
+                           MathUtil.applyDeadband(this.driver.getLeftY(), deadband) != 0 ||
+                           MathUtil.applyDeadband(this.driver.getRightX(), deadband) != 0 ||
+                           MathUtil.applyDeadband(this.driver.getRightY(), deadband) != 0 ||
+                           this.driver.povLeft().getAsBoolean() ||
+                           this.driver.povRight().getAsBoolean();
+                }).withName(name)));
     }
 }
