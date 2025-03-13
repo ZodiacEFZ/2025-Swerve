@@ -85,38 +85,64 @@
             ]
           },
           {
-            "title": "List Layout",
-            "x": 832.0,
-            "y": 384.0,
+            "title": "Arm",
+            "x": 1536.0,
+            "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 768.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "Arm Commands",
-                "x": 896.0,
-                "y": 448.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "ComboBox Chooser",
-                "properties": {
-                  "topic": "/SmartDashboard/SendableChooser[1]",
-                  "period": 0.06,
-                  "sort_options": false
-                }
-              },
-              {
-                "title": "Run",
+                "title": "L4",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 256.0,
                 "height": 128.0,
                 "type": "Command",
                 "properties": {
-                  "topic": "/SmartDashboard/Run",
+                  "topic": "/SmartDashboard/L4",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "L3",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/L3",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "L2",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/L2",
+                  "period": 0.06,
+                  "show_type": true
+                }
+              },
+              {
+                "title": "L1",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/L1",
                   "period": 0.06,
                   "show_type": true
                 }
@@ -145,6 +171,19 @@
                   "topic": "/SmartDashboard/Idle",
                   "period": 0.06,
                   "show_type": false
+                }
+              },
+              {
+                "title": "Drop",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Command",
+                "properties": {
+                  "topic": "/SmartDashboard/Drop",
+                  "period": 0.06,
+                  "show_type": true
                 }
               }
             ]
@@ -203,7 +242,7 @@
           },
           {
             "title": "Limelight",
-            "x": 1088.0,
+            "x": 1792.0,
             "y": 384.0,
             "width": 448.0,
             "height": 384.0,
@@ -228,8 +267,8 @@
             }
           },
           {
-            "title": "USB Camera 0",
-            "x": 1088.0,
+            "title": "Climber Camera",
+            "x": 1792.0,
             "y": 0.0,
             "width": 448.0,
             "height": 384.0,
@@ -262,6 +301,201 @@
               "divisions": 5,
               "inverted": false,
               "orientation": "horizontal"
+            }
+          },
+          {
+            "title": "Front - Left",
+            "x": 960.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Front - Right",
+            "x": 1216.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Front Left - Left",
+            "x": 896.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front Left - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Front Left - Right",
+            "x": 896.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front Left - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Front Right - Left",
+            "x": 1280.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front Right - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Front Right - Right",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Front Right - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear - Left",
+            "x": 960.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear - Right",
+            "x": 1216.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear Left - Left",
+            "x": 896.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear Left - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear Left - Right",
+            "x": 896.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear Left - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear Right - Left",
+            "x": 1280.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear Right - Left",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rear Right - Right",
+            "x": 1280.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rear Right - Right",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rotate Horizontal",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rotate Horizontal",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rotate Horizontal Reversed",
+            "x": 640.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rotate Horizontal Reversed",
+              "period": 0.06,
+              "show_type": true
+            }
+          },
+          {
+            "title": "Rotate Vertical",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Rotate Vertical",
+              "period": 0.06,
+              "show_type": true
             }
           }
         ]
