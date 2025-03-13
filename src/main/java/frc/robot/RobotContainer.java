@@ -9,7 +9,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -30,10 +29,7 @@ import frc.libzodiac.api.SwerveDrivetrain;
 import frc.libzodiac.drivetrain.CTRESwerve;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.TalonFXSwerve;
-import frc.libzodiac.hardware.CANCoder;
-import frc.libzodiac.hardware.Limelight;
-import frc.libzodiac.hardware.Pigeon;
-import frc.libzodiac.hardware.TalonFXMotor;
+import frc.libzodiac.hardware.*;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
@@ -44,8 +40,8 @@ import frc.robot.subsystem.Climber;
 import frc.robot.subsystem.Intake;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.stream.IntStream;
 
 /*
@@ -55,6 +51,7 @@ import java.util.stream.IntStream;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer implements Sendable {
+    private static final boolean USE_CTRE_SWERVE = false;
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
     //    private final CommandXboxController operator = new CommandXboxController(1);
@@ -78,11 +75,11 @@ public class RobotContainer implements Sendable {
         heading.setIZone(Math.PI / 8);
 
         var constraints = new PathConstraints(TunerConstants.kSpeedAt12Volts,
-                                              Units.MetersPerSecondPerSecond.of(0.25),
-                                              Units.DegreesPerSecond.of(180),
-                                              Units.DegreesPerSecondPerSecond.of(180));
+                                              Units.MetersPerSecondPerSecond.of(10),
+                                              Units.DegreesPerSecond.of(360),
+                                              Units.DegreesPerSecondPerSecond.of(720));
 
-        if (true) {
+        if (USE_CTRE_SWERVE) {
             this.drivetrain = new CTRESwerve(constraints, heading,
                                              TunerConstants.DrivetrainConstants,
                                              TunerConstants.FrontLeft, TunerConstants.FrontRight,
@@ -98,13 +95,13 @@ public class RobotContainer implements Sendable {
             final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
                                                                  .withDrive(6)
                                                                  .withEncoder(new CANCoder(10,
-                                                                                           -0.251709))
+                                                                                           -0.231934))
                                                                  .withAngleInverted(true)
                                                                  .withDriveInverted(true);
             final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
                                                                    .withDrive(8)
                                                                    .withEncoder(new CANCoder(12,
-                                                                                             0.035645))
+                                                                                             0.038085))
                                                                    .withAngleInverted(true)
                                                                    .withDriveInverted(true);
             final var rearRight = new TalonFXSwerveModule.Config().withAngle(3)
@@ -122,9 +119,9 @@ public class RobotContainer implements Sendable {
                                                         .withRearLeft(rearLeft)
                                                         .withRearRight(rearRight)
                                                         .withDriveConfig(
-                                                                new Slot0Configs().withKP(0.1)
-                                                                                  .withKI(0)
-                                                                                  .withKD(0)
+                                                                new Slot0Configs().withKP(0.2)
+                                                                                  .withKI(5)
+                                                                                  .withKD(0.0005)
                                                                                   .withKS(0)
                                                                                   .withKV(0.124))
                                                         .withAngleConfig(
@@ -167,10 +164,11 @@ public class RobotContainer implements Sendable {
         //noinspection resource
         CameraServer.startAutomaticCapture();
 
-        Collection<TalonFX> motors = this.drivetrain.getTalonFXMotors();
-//        motors.addAll(this.armStage2.getTalonFXMotors());
-//        motors.addAll(this.intake.getTalonFXMotors());
-//        motors.addAll(this.climber.getTalonFXMotors());
+        var motors = new HashSet<TalonFX>();
+        motors.addAll(this.drivetrain.getTalonFXMotors());
+        motors.addAll(this.armStage2.getTalonFXMotors());
+        motors.addAll(this.intake.getTalonFXMotors());
+        motors.addAll(this.climber.getTalonFXMotors());
         this.musicPlayer.addInstrument(motors);
     }
 
@@ -348,14 +346,15 @@ public class RobotContainer implements Sendable {
         positions.put("Front Right - Right",
                       new Pose2d(new Translation2d(5.24, 3.04), new Rotation2d(Math.PI * 2 / 3)));
         positions.forEach((name, pose) -> SmartDashboard.putData(
-                PathPlanner.getInstance().getFindPathCommand(pose).until(() -> {
-                    final var deadband = 0.02;
-                    return MathUtil.applyDeadband(this.driver.getLeftX(), deadband) != 0 ||
-                           MathUtil.applyDeadband(this.driver.getLeftY(), deadband) != 0 ||
-                           MathUtil.applyDeadband(this.driver.getRightX(), deadband) != 0 ||
-                           MathUtil.applyDeadband(this.driver.getRightY(), deadband) != 0 ||
-                           this.driver.povLeft().getAsBoolean() ||
-                           this.driver.povRight().getAsBoolean();
-                }).withName(name)));
+                PathPlanner.getInstance().getFindPathCommand(pose)//.until(() -> {
+//                    final var deadband = 0.02;
+//                    return MathUtil.applyDeadband(this.driver.getLeftX(), deadband) != 0 ||
+//                           MathUtil.applyDeadband(this.driver.getLeftY(), deadband) != 0 ||
+//                           MathUtil.applyDeadband(this.driver.getRightX(), deadband) != 0 ||
+//                           MathUtil.applyDeadband(this.driver.getRightY(), deadband) != 0 ||
+//                           this.driver.povLeft().getAsBoolean() ||
+//                           this.driver.povRight().getAsBoolean();
+//                })
+                           .withName(name)));
     }
 }
