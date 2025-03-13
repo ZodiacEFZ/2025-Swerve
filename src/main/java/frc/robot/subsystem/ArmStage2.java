@@ -28,12 +28,12 @@ public class ArmStage2 extends SubsystemBase {
     private static final Angle L1_POSITION = Units.Degrees.of(-25);
     private static final Angle L2_POSITION = Units.Degrees.of(-12);
     private static final Angle L3_POSITION = Units.Degrees.of(13);
-    private static final Angle L4_POSITION = Units.Degrees.of(80);
+    private static final Angle L4_POSITION = Units.Degrees.of(100);
     private static final Angle ROTATION_HORIZONTAL = Units.Rotations.of(0);
     private static final Angle ROTATION_HORIZONTAL_REVERSED = Units.Rotations.of(
             42.0 * 60 / 18 / 2);
     private static final Angle ROTATION_VERTICAL = ROTATION_HORIZONTAL_REVERSED.div(2);
-    private final MagEncoder encoder = new MagEncoder(27, -3700);
+    private final MagEncoder encoder = new MagEncoder(27, -3650);
     private final TalonFXMotor motor = new TalonFXMotor(28);
     private final SparkMaxMotor wrist = new SparkMaxMotor(24);
     private Angle position = null;
@@ -55,9 +55,9 @@ public class ArmStage2 extends SubsystemBase {
         slot0Config.GravityType = GravityTypeValue.Arm_Cosine;
         this.motor.applyConfiguration(slot0Config);
         var motionMagicConfigs = new MotionMagicConfigs();
-        motionMagicConfigs.MotionMagicCruiseVelocity = 1;
-        motionMagicConfigs.MotionMagicAcceleration = 5;
-        motionMagicConfigs.MotionMagicJerk = 10;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 0.25;
+        motionMagicConfigs.MotionMagicAcceleration = 0.5;
+        motionMagicConfigs.MotionMagicJerk = 2;
         this.motor.applyConfiguration(motionMagicConfigs);
         this.motor.setBrakeWhenNeutral(true);
         this.motor.setSensorToMechanismRatio(58.0 / 50 * 100);
@@ -65,7 +65,6 @@ public class ArmStage2 extends SubsystemBase {
         this.motor.setRelativeEncoderPosition(Maths.limitAngle(angle, POSITION_LIMIT));
         this.motor.setSoftwareLimitSwitch(REVERSE_POSITION_LIMIT, FORWARD_POSITION_LIMIT);
 
-        this.wrist.factoryDefault();
         this.wrist.setPID(0.5, 0, 0.5);
         var config = new SparkMaxConfig();
         config.idleMode(SparkBaseConfig.IdleMode.kBrake);
