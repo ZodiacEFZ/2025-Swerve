@@ -21,22 +21,23 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class ArmStage2 extends SubsystemBase {
+    public static final Angle L1_POSITION = Units.Degrees.of(-10);
+    public static final Angle L2_POSITION = Units.Degrees.of(5);
+    public static final Angle L3_POSITION = Units.Degrees.of(25);
+    public static final Angle L4_POSITION = Units.Degrees.of(80);
+    public static final Angle ROTATION_HORIZONTAL = Units.Rotations.of(0);
+    public static final Angle ROTATION_HORIZONTAL_REVERSED = Units.Rotations.of(42.0 * 60 / 18 / 2);
+    public static final Angle ROTATION_VERTICAL = ROTATION_HORIZONTAL_REVERSED.div(2);
     private static final Angle POSITION_LIMIT = Units.Degrees.of(-80);
     private static final Angle REVERSE_POSITION_LIMIT = Units.Degrees.of(-45);
     private static final Angle FORWARD_POSITION_LIMIT = Units.Degrees.of(115);
-    private static final Angle INTAKE_POSITION = Units.Degrees.of(0);
-    private static final Angle L1_POSITION = Units.Degrees.of(-25);
-    private static final Angle L2_POSITION = Units.Degrees.of(-12);
-    private static final Angle L3_POSITION = Units.Degrees.of(13);
-    private static final Angle L4_POSITION = Units.Degrees.of(100);
-    private static final Angle ROTATION_HORIZONTAL = Units.Rotations.of(0);
-    private static final Angle ROTATION_HORIZONTAL_REVERSED = Units.Rotations.of(
-            42.0 * 60 / 18 / 2);
-    private static final Angle ROTATION_VERTICAL = ROTATION_HORIZONTAL_REVERSED.div(2);
+    private static final Angle INTAKE_POSITION = Units.Degrees.of(10);
+    private static final Angle L4_THRESHOLD = Units.Degrees.of(55);
     private final MagEncoder encoder = new MagEncoder(27, -3650);
     private final TalonFXMotor motor = new TalonFXMotor(28);
     private final SparkMaxMotor wrist = new SparkMaxMotor(24);
     private Angle position = null;
+    private Angle offset = Units.Degrees.of(0);
 
     public ArmStage2() {
         this.encoder.setInverted(true);
@@ -84,7 +85,7 @@ public class ArmStage2 extends SubsystemBase {
     }
 
     public void moveTo(Angle position) {
-        this.motor.MotionMagicPosition(position);
+        this.motor.MotionMagicPosition(position.plus(this.offset));
     }
 
     public Command getRestoreCommand() {
@@ -148,7 +149,7 @@ public class ArmStage2 extends SubsystemBase {
 
     public void L4() {
         this.moveTo(L4_POSITION);
-        this.rotate(ROTATION_HORIZONTAL_REVERSED);
+        this.rotate(ROTATION_HORIZONTAL);
         this.position = L4_POSITION;
     }
 
@@ -166,7 +167,7 @@ public class ArmStage2 extends SubsystemBase {
 
     public void L1() {
         this.moveTo(L1_POSITION);
-        this.rotate(ROTATION_HORIZONTAL);
+        this.rotate(ROTATION_VERTICAL);
         this.position = L1_POSITION;
     }
 
@@ -180,10 +181,10 @@ public class ArmStage2 extends SubsystemBase {
         if (this.position == null || this.position.equals(INTAKE_POSITION)) {
             return;
         }
-        if (this.position.equals(L4_POSITION)) {
-            this.moveTo(L4_POSITION.plus(Units.Degrees.of(10)));
+        if (this.position.plus(this.offset).gte(L4_THRESHOLD)) {
+            this.dropForward();
         } else {
-            this.moveTo(this.position.minus(Units.Degrees.of(10)));
+            this.dropBackward();
         }
     }
 
@@ -197,9 +198,33 @@ public class ArmStage2 extends SubsystemBase {
         this.wrist.MAXMotionPosition(position);
     }
 
+    private void dropForward() {
+        this.moveTo(this.position.plus(Units.Degrees.of(15)));
+    }
+
+    private void dropBackward() {
+        this.moveTo(this.position.minus(Units.Degrees.of(15)));
+    }
+
     public Collection<TalonFX> getTalonFXMotors() {
         Collection<TalonFX> motors = new HashSet<>();
         motors.add(this.motor.getMotor());
         return motors;
+    }
+
+    public Command getMoveUpCommand() {
+        return runOnce(() -> this.offset = this.offset.plus(Units.Degrees.of(3)));
+    }
+
+    public Command getMoveDownCommand() {
+        return runOnce(() -> this.offset = this.offset.minus(Units.Degrees.of(3)));
+    }
+
+    public Command getDropForwardCommand() {
+        return runOnce(this::dropForward);
+    }
+
+    public Command getDropBackwardCommand() {
+        return runOnce(this::dropBackward);
     }
 }
