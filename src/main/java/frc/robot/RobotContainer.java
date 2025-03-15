@@ -29,7 +29,10 @@ import frc.libzodiac.api.SwerveDrivetrain;
 import frc.libzodiac.drivetrain.CTRESwerve;
 import frc.libzodiac.drivetrain.PathPlanner;
 import frc.libzodiac.drivetrain.TalonFXSwerve;
-import frc.libzodiac.hardware.*;
+import frc.libzodiac.hardware.CANCoder;
+import frc.libzodiac.hardware.Limelight;
+import frc.libzodiac.hardware.Pigeon;
+import frc.libzodiac.hardware.TalonFXMotor;
 import frc.libzodiac.hardware.group.TalonFXSwerveModule;
 import frc.libzodiac.util.CommandUtil;
 import frc.libzodiac.util.Rotation2dSupplier;
@@ -54,7 +57,7 @@ public class RobotContainer implements Sendable {
     private static final boolean USE_CTRE_SWERVE = false;
     // The driver's controller
     private final CommandXboxController driver = new CommandXboxController(0);
-    //    private final CommandXboxController operator = new CommandXboxController(1);
+    private final CommandXboxController operator = new CommandXboxController(1);
     private final SwerveDrivetrain drivetrain;
     private final Intake intake = new Intake();
     private final PowerDistribution powerDistribution = new PowerDistribution(63,
@@ -150,7 +153,7 @@ public class RobotContainer implements Sendable {
         this.configureButtonBindings();
 
         this.drivetrain.setFieldCentric(true);
-        this.drivetrain.setDirectAngle(true);
+        this.drivetrain.setDirectAngle(false);
         this.setDriveCommand();
 
         this.limelight = new Limelight(this.drivetrain);
@@ -189,10 +192,10 @@ public class RobotContainer implements Sendable {
                    .onChange(Commands.runOnce(this::toggleDirectAngle).ignoringDisable(true));
         this.driver.povLeft()
                    .onTrue(Commands.runOnce(() -> this.drivetrain.setTargetHeading(
-                           new Rotation2d(Units.Degrees.of(-54)))));
+                           new Rotation2d(Units.Degrees.of(-84)))));
         this.driver.povRight()
                    .onTrue(Commands.runOnce(() -> this.drivetrain.setTargetHeading(
-                           new Rotation2d(Units.Degrees.of(54)))));
+                           new Rotation2d(Units.Degrees.of(84)))));
 
         // Arm
         this.driver.povLeft().onTrue(this.armStage2.getIntakeCommand());
@@ -202,6 +205,14 @@ public class RobotContainer implements Sendable {
         this.driver.b()
                    .onTrue(this.armStage2.getDropCommand())
                    .onFalse(this.armStage2.getRestoreCommand());
+        this.operator.x()
+                     .onTrue(this.armStage2.getDropForwardCommand())
+                     .onFalse(this.armStage2.getRestoreCommand());
+        this.operator.b()
+                     .onTrue(this.armStage2.getDropBackwardCommand())
+                     .onFalse(this.armStage2.getRestoreCommand());
+        this.operator.y().onTrue(this.armStage2.getMoveUpCommand());
+        this.operator.a().onTrue(this.armStage2.getMoveDownCommand());
 
         // Intake
         this.driver.leftTrigger()
@@ -210,6 +221,22 @@ public class RobotContainer implements Sendable {
         this.driver.rightTrigger()
                    .onTrue(this.intake.getIntakeCommand())
                    .onFalse(this.intake.getStopCommand());
+
+        this.operator.leftTrigger()
+                     .onTrue(this.intake.getOuttakeCommand())
+                     .onFalse(this.intake.getStopCommand());
+        this.operator.rightTrigger()
+                     .onTrue(this.intake.getIntakeCommand())
+                     .onFalse(this.intake.getStopCommand());
+        this.operator.povUp()
+                     .onTrue(this.armStage2.getRotateCommand(ArmStage2.ROTATION_HORIZONTAL));
+        this.operator.povLeft()
+                     .onTrue(this.armStage2.getRotateCommand(ArmStage2.ROTATION_VERTICAL));
+        this.operator.povRight()
+                     .onTrue(this.armStage2.getRotateCommand(ArmStage2.ROTATION_VERTICAL));
+        this.operator.povDown()
+                     .onTrue(this.armStage2.getRotateCommand(
+                             ArmStage2.ROTATION_HORIZONTAL_REVERSED));
 
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
