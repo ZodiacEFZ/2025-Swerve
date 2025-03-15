@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.libzodiac.hardware.LEDController;
-import frc.libzodiac.ui.Elastic;
 import frc.libzodiac.util.GameUtil;
 
 /**
@@ -128,8 +127,7 @@ public class Robot extends TimedRobot {
             this.disabledTimer.stop();
         }
 
-        var pattern = LEDPattern.solid(
-                                        GameUtil.isRedAlliance() ? Color.kRed : Color.kBlue)
+        var pattern = LEDPattern.solid(GameUtil.isRedAlliance() ? Color.kRed : Color.kBlue)
                                 .breathe(Units.Seconds.of(2));
         LEDController.getInstance().applyAll(pattern);
     }
