@@ -25,6 +25,7 @@ import frc.libzodiac.util.GameUtil;
 public class Robot extends TimedRobot {
     private final RobotContainer bot;
     private final Timer disabledTimer;
+    private final Timer gcTimer = new Timer();
     private Command autonomousCommand;
 
     /**
@@ -66,7 +67,7 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         this.bot.getMusicPlayer().stop();
 
-        Elastic.selectTab("Autonomous");
+//        Elastic.selectTab("Autonomous");
         this.bot.brake();
 
         this.autonomousCommand = this.bot.getAutonomousCommand();
@@ -88,7 +89,7 @@ public class Robot extends TimedRobot {
         }
 
         this.bot.getMusicPlayer().stop();
-        Elastic.selectTab("Teleoperated");
+//        Elastic.selectTab("Teleoperated");
     }
 
     @Override
@@ -112,6 +113,10 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+
+        if (gcTimer.advanceIfElapsed(5)) {
+            System.gc();
+        }
 
         SmartDashboard.putData("Robot", this.bot);
     }
