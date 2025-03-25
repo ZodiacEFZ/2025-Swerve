@@ -12,11 +12,13 @@ import frc.libzodiac.util.Maths;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Supplier;
 
 public class Climber extends SubsystemBase {
-    private final MagEncoder encoder = new MagEncoder(30, -2910);
+    private final MagEncoder encoder = new MagEncoder(30, -2770);
     private final TalonFXMotor motor = new TalonFXMotor(31);
     private Position position = Position.DOWN;
+    private boolean canClimb = false;
 
     public Climber() {
         this.encoder.setInverted(true);
@@ -42,6 +44,7 @@ public class Climber extends SubsystemBase {
     public void down() {
         this.motor.setPosition(Position.DOWN.position);
         this.position = Position.DOWN;
+        this.canClimb = false;
     }
 
     public Command getUpCommand() {
@@ -51,6 +54,7 @@ public class Climber extends SubsystemBase {
     public void up() {
         this.motor.setPosition(Position.UP.position);
         this.position = Position.UP;
+        this.canClimb = true;
     }
 
     public Command getClimbCommand() {
@@ -58,8 +62,10 @@ public class Climber extends SubsystemBase {
     }
 
     public void climb() {
-        this.motor.setPosition(Position.CLIMB.position);
-        this.position = Position.CLIMB;
+        if (this.canClimb) {
+            this.motor.setPosition(Position.CLIMB.position);
+            this.position = Position.CLIMB;
+        }
     }
 
     public Command getSwitchClimberStateCommand() {
@@ -78,6 +84,14 @@ public class Climber extends SubsystemBase {
         Collection<TalonFX> motors = new HashSet<>();
         motors.add(this.motor.getMotor());
         return motors;
+    }
+
+    public Command getClimberOperationCommand(Supplier<Double> speed) {
+        return run(() -> {
+            if (this.canClimb) {
+                this.motor.setVoltage(Units.Volts.of(speed.get()));
+            }
+        });
     }
 
     private enum Position {

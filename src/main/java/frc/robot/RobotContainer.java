@@ -45,6 +45,7 @@ import frc.robot.subsystem.Intake;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /*
@@ -92,13 +93,13 @@ public class RobotContainer implements Sendable {
             final var frontLeft = new TalonFXSwerveModule.Config().withAngle(1)
                                                                   .withDrive(5)
                                                                   .withEncoder(
-                                                                          new CANCoder(9, 0.294678))
+                                                                          new CANCoder(9, 0.308838))
                                                                   .withAngleInverted(true)
                                                                   .withDriveInverted(true);
             final var rearLeft = new TalonFXSwerveModule.Config().withAngle(2)
                                                                  .withDrive(6)
-                                                                 .withEncoder(new CANCoder(10,
-                                                                                           -0.231934))
+                                                                 .withEncoder(
+                                                                         new CANCoder(10, 0.199951))
                                                                  .withAngleInverted(true)
                                                                  .withDriveInverted(true);
             final var frontRight = new TalonFXSwerveModule.Config().withAngle(4)
@@ -136,6 +137,8 @@ public class RobotContainer implements Sendable {
                                                                                   .withKA(0)
                                                                                   .withStaticFeedforwardSign(
                                                                                           StaticFeedforwardSignValue.UseClosedLoopSign))
+                                                        .withCurrentLimit(Units.Amps.of(60),
+                                                                          Units.Amps.of(60))
                                                         .withGyro(new Pigeon(13))
                                                         .withHeadingPID(heading)
                                                         .withDriveGearRatio(6.75)
@@ -146,7 +149,6 @@ public class RobotContainer implements Sendable {
                                                         .build();
         }
 
-        // TODO: add path constraints
         PathPlanner.initInstance(this.drivetrain, constraints);
 
         // Configure the button bindings
@@ -155,6 +157,7 @@ public class RobotContainer implements Sendable {
         this.drivetrain.setFieldCentric(true);
         this.drivetrain.setDirectAngle(false);
         this.setDriveCommand();
+        this.setClimberOperationCommand();
 
         this.limelight = new Limelight(this.drivetrain);
         this.limelight.setValidIDs(IntStream.rangeClosed(1, 22).toArray());
@@ -184,7 +187,7 @@ public class RobotContainer implements Sendable {
     private void configureButtonBindings() {
         // Drivetrain
         this.driver.a().onTrue(Commands.runOnce(this::toggleAutoHeading).ignoringDisable(true));
-        this.driver.x().onTrue(Commands.runOnce(this::toggleSlowMode).ignoringDisable(true));
+        this.driver.leftBumper().onChange(Commands.runOnce(this::toggleSlowMode).ignoringDisable(true));
         this.driver.back().onTrue(Commands.runOnce(this::zeroHeading).ignoringDisable(true));
         this.driver.start()
                    .onTrue(Commands.runOnce(this::toggleFieldCentric).ignoringDisable(true));
@@ -213,6 +216,10 @@ public class RobotContainer implements Sendable {
                      .onFalse(this.armStage2.getRestoreCommand());
         this.operator.y().onTrue(this.armStage2.getMoveUpCommand());
         this.operator.a().onTrue(this.armStage2.getMoveDownCommand());
+        this.operator.back().onTrue(this.armStage2.getL1Command());
+        this.operator.start().onTrue(this.armStage2.getL1Command());
+        this.operator.leftBumper().onTrue(this.armStage2.getL2Command());
+        this.operator.rightBumper().onTrue(this.armStage2.getL3Command());
 
         // Intake
         this.driver.leftTrigger()
@@ -240,7 +247,7 @@ public class RobotContainer implements Sendable {
 
         //Climber
         this.driver.y().onTrue(this.climber.getSwitchClimberStateCommand());
-        this.driver.leftBumper().onTrue(this.climber.getClimbCommand());
+        this.operator.leftStick().onTrue(this.climber.getClimbCommand());
     }
 
     private void setDriveCommand() {
@@ -285,6 +292,11 @@ public class RobotContainer implements Sendable {
                 this.drivetrain.getDriveCommand(directAngleInput, angularVelocityInput,
                                                 this.drivetrain::getDirectAngle,
                                                 this.drivetrain::getFieldCentric));
+    }
+
+    private void setClimberOperationCommand() {
+        Supplier<Double> speedSupplier = () -> -operator.getLeftY();
+        this.climber.setDefaultCommand(this.climber.getClimberOperationCommand(speedSupplier));
     }
 
     private void toggleAutoHeading() {

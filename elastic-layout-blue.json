@@ -174,14 +174,14 @@
                 }
               },
               {
-                "title": "Drop",
+                "title": "Remove",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 256.0,
                 "height": 128.0,
                 "type": "Command",
                 "properties": {
-                  "topic": "/SmartDashboard/Drop",
+                  "topic": "/SmartDashboard/Remove",
                   "period": 0.06,
                   "show_type": true
                 }
@@ -190,22 +190,6 @@
           }
         ],
         "containers": [
-          {
-            "title": "Match Time",
-            "x": 320.0,
-            "y": 0.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Match Time",
-            "properties": {
-              "topic": "/SmartDashboard/Match Time",
-              "period": 0.06,
-              "data_type": "double",
-              "time_display_mode": "Minutes and Seconds",
-              "red_start_time": 15,
-              "yellow_start_time": 30
-            }
-          },
           {
             "title": "Field",
             "x": 0.0,
@@ -276,7 +260,7 @@
             "properties": {
               "topic": "/CameraPublisher/USB Camera 0",
               "period": 0.06,
-              "rotation_turns": 0,
+              "rotation_turns": 1,
               "compression": 20,
               "fps": 15,
               "resolution": [
@@ -496,6 +480,22 @@
               "topic": "/SmartDashboard/Rotate Vertical",
               "period": 0.06,
               "show_type": true
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 320.0,
+            "y": 0.0,
+            "width": 320.0,
+            "height": 192.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Match Time",
+              "period": 0.033,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 15,
+              "yellow_start_time": 30
             }
           }
         ]

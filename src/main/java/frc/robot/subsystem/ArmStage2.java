@@ -8,6 +8,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,8 +29,8 @@ public class ArmStage2 extends SubsystemBase {
     public static final Angle ROTATION_HORIZONTAL = Units.Rotations.of(0);
     public static final Angle ROTATION_HORIZONTAL_REVERSED = Units.Rotations.of(42.0 * 60 / 18 / 2);
     public static final Angle ROTATION_VERTICAL = ROTATION_HORIZONTAL_REVERSED.div(2);
-    private static final Angle POSITION_LIMIT = Units.Degrees.of(-80);
-    private static final Angle REVERSE_POSITION_LIMIT = Units.Degrees.of(-45);
+    private static final Angle POSITION_LIMIT = Units.Degrees.of(-90);
+    private static final Angle REVERSE_POSITION_LIMIT = Units.Degrees.of(-50);
     private static final Angle FORWARD_POSITION_LIMIT = Units.Degrees.of(115);
     private static final Angle INTAKE_POSITION = Units.Degrees.of(10);
     private static final Angle L4_THRESHOLD = Units.Degrees.of(55);
@@ -106,13 +107,17 @@ public class ArmStage2 extends SubsystemBase {
         SmartDashboard.putData("L2", this.getL2Command());
         SmartDashboard.putData("L1", this.getL1Command());
         SmartDashboard.putData("Intake", this.getIntakeCommand());
-        SmartDashboard.putData("Drop", this.getDropCommand());
+        SmartDashboard.putData("Remove", this.getRemoveCommand());
         SmartDashboard.putData("Idle", this.getIdleCommand());
 
         SmartDashboard.putData("Rotate Horizontal", this.getRotateCommand(ROTATION_HORIZONTAL));
         SmartDashboard.putData("Rotate Vertical", this.getRotateCommand(ROTATION_VERTICAL));
         SmartDashboard.putData("Rotate Horizontal Reversed",
                                this.getRotateCommand(ROTATION_HORIZONTAL_REVERSED));
+    }
+
+    private Sendable getRemoveCommand() {
+        return runOnce(this::remove);
     }
 
     public Command getL4Command() {
@@ -191,6 +196,12 @@ public class ArmStage2 extends SubsystemBase {
     public void idle() {
         this.moveTo(REVERSE_POSITION_LIMIT);
         this.rotate(ROTATION_HORIZONTAL);
+        this.position = null;
+    }
+
+    public void remove() {
+        this.moveTo(REVERSE_POSITION_LIMIT);
+        this.rotate(ROTATION_HORIZONTAL_REVERSED);
         this.position = null;
     }
 
